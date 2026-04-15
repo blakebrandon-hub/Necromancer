@@ -1764,6 +1764,48 @@ Morgar has two risen: Bonehelm (former soldier) and Silt (former quarryman).
 
 Only emit tags that changed. All numbers whole integers.`;
 
+// ── CONTEXT BUILDER ──
+function buildContext() {
+    let ctx = `=== CURRENT STATE ===\n`;
+    ctx += `HP: ${gameState.hp}/100 | Soul: ${gameState.soul} | Gold: ${gameState.gold}\n`;
+    ctx += `Location: ${gameState.location} (${gameState.region})\n`;
+    
+    // Army
+    const armyStr = gameState.army.length > 0 
+        ? gameState.army.map(u => `${u.name} [${u.was}]`).join(', ') 
+        : 'None (Void creatures consumed them)';
+    ctx += `Army (${gameState.armySize}/${gameState.armyMax}): ${armyStr}\n`;
+    
+    // Inventory
+    const invStr = gameState.inventory && gameState.inventory.length > 0 
+        ? gameState.inventory.map(i => `${i.name} (x${i.qty})`).join(', ') 
+        : 'Empty';
+    ctx += `Inventory: ${invStr}\n`;
+    
+    // Active Vow
+    if (gameState.active_oath) {
+        ctx += `Active Vow: ${gameState.active_oath.title}\n`;
+        ctx += `Vow Objective: ${gameState.active_oath.desc}\n`;
+        ctx += `Vow Reward: ${gameState.active_oath.pay || 'None specified'}\n\n`;
+    } else {
+        ctx += `Active Vow: None\n\n`;
+    }
+
+    ctx += `=== RECENT HISTORY ===\n`;
+    // Grab the last 10 messages (excluding the current action just pushed)
+    const recentLogs = conversationLog.slice(-11, -1);
+    if (recentLogs.length === 0) {
+        ctx += `(Start of adventure)\n`;
+    } else {
+        recentLogs.forEach(msg => {
+            if (msg.role === 'user') ctx += `Player: ${msg.content}\n`;
+            else ctx += `Narrator: ${msg.content}\n`;
+        });
+    }
+    
+    return ctx;
+}
+
 async function sendAction() {
     const input = document.getElementById('action-input');
     const action = input.value.trim();
@@ -1773,10 +1815,14 @@ async function sendAction() {
     gameState.turn++;
     turnCount++;
 
+    // Push current action to log
     conversationLog.push({ role: 'user', content: action });
 
     document.getElementById('loading').classList.add('visible');
     document.querySelector('.btn-submit').disabled = true;
+
+    // Build the dynamic context window
+    const currentContext = buildContext();
 
     try {
         const res = await fetch('/api/chat', {
@@ -1784,7 +1830,7 @@ async function sendAction() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
                 system_prompt: SYSTEM_PROMPT,
-                context: '',
+                context: currentContext, // Pass the dynamically built context here
                 player_action: action
             })
         });
@@ -1792,6 +1838,7 @@ async function sendAction() {
         if (data.error) throw new Error(data.error);
         const responseText = data.text;
 
+        // Save AI response to log
         conversationLog.push({ role: 'assistant', content: responseText });
 
         const signal = parseTags(responseText);
