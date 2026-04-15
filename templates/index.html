@@ -1205,8 +1205,8 @@ const gameState = {
     turn: 0,
     standing: { ashwood: 0, greyfall: 0, heartlands: 0, coast: 0 },
     army: [
-        { name: 'Bonehelm', was: 'Border Soldier, Greyfall', mem: 'He remembers the weight of his shield on long marches north.' },
-        { name: 'Silt', was: 'Quarryman, Greyfall', mem: 'He remembers the sound the stone made when it finally gave way.' }
+        { name: 'Bonehelm', was: 'Border Soldier, Greyfall', mem: 'He remembers the weight of his shield on long marches north.', hp: 140, type: 'Risen' },
+        { name: 'Silt', was: 'Quarryman, Greyfall', mem: 'He remembers the sound the stone made when it finally gave way.', hp: 108, type: 'Risen' }
     ],
     inventory: [],
     oaths: [],
@@ -1615,6 +1615,31 @@ function parseTags(text) {
         gameState.armySize = gameState.army.length;
     }
 
+     // 10. UNIT HP: [UNIT_HP: Name | +/-N]
+    const unitHpMatches = [...text.matchAll(/\[UNIT_HP:\s*([^|]+)\|\s*([+-]?\d+)\]/gi)];
+    unitHpMatches.forEach(m => {
+        const unitName = m[1].trim().toLowerCase();
+        const change = parseInt(m[2]);
+        
+        // Find unit (allow partial matches in case AI misspells)
+        let unitIndex = gameState.army.findIndex(u => u.name.toLowerCase() === unitName);
+        if (unitIndex === -1) {
+            unitIndex = gameState.army.findIndex(u => u.name.toLowerCase().includes(unitName) || unitName.includes(u.name.toLowerCase()));
+        }
+
+        if (unitIndex !== -1) {
+            gameState.army[unitIndex].hp += change;
+            
+            // Check for death
+            if (gameState.army[unitIndex].hp <= 0) {
+                gameState.army.splice(unitIndex, 1);
+                gameState.armySize = gameState.army.length;
+            } else if (gameState.army[unitIndex].hp > 100) {
+                gameState.army[unitIndex].hp = 100; // Cap max HP
+            }
+        }
+    });
+
     // Return Signal for UI display
     const signalMatch = text.match(/\[SIGNAL:\s*([^\]]+)\]/i);
     return signalMatch ? signalMatch[1].trim() : null;
@@ -1669,6 +1694,9 @@ function stripTags(text) {
         // 6. Visuals & Army
         .replace(/\[RAISE:\s*[^\]]+\]/gi, '')
 
+        // 6b. Individual Unit HP
+        .replace(/\[UNIT_HP:\s*[^\]]+\]/gi, '')
+
         // 7. SFX (Handles potential nested JSON brackets)
         .replace(/\[SFX:\s*[\s\S]*?(?:\}|\])\s*\]/gi, '')
 
@@ -1711,8 +1739,8 @@ They serve Zalekindor. They erase rather than kill.
 6. [GOLD: +/-N] — Gold gained (pay, loot, trade) or spent. When a Vow_End fires, also emit the gold award separately.
 7. [ITEM: + ItemName] or [ITEM: - ItemName] — Add or remove a notable item from inventory.
 8. [Combat: Start/End] — When combat begins or ends
-9. [SIGNAL: One atmospheric observation. The world noticing itself.]
-10. [SFX: { "synth": "<Type>", "freq": <N>, "detune": <N>, "decay": <N> }]  — when a spell is cast (JSON must be valid)
+9. [SFX: { "synth": "<Type>", "freq": <N>, "detune": <N>, "decay": <N> }]  — when a spell is cast (JSON must be valid)
+10. [UNIT_HP: Name | +/-N] — Damage or heal a specific raised unit. If they drop to 0 HP, they are permanently destroyed.
 
 ## REGIONS
 - Ashwood: Ancient forest, void consuming from within. Druids, spirits, sacred places.
@@ -1772,7 +1800,7 @@ function buildContext() {
     
     // Army
     const armyStr = gameState.army.length > 0 
-        ? gameState.army.map(u => `${u.name} [${u.was}]`).join(', ') 
+        ? gameState.army.map(u => `${u.name} (HP: ${u.hp}/100) [${u.was}]`).join(', ') 
         : 'None (Void creatures consumed them)';
     ctx += `Army (${gameState.armySize}/${gameState.armyMax}): ${armyStr}\n`;
     
