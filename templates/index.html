@@ -269,6 +269,12 @@ header {
     font-size: 0.8rem;
     color: var(--text-dim);
     font-style: italic;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ritual-slot:hover {
+    border-color: var(--accent-soul-dim);
 }
 
 .ritual-slot.active {
@@ -730,22 +736,12 @@ header {
     margin-bottom: 6px;
 }
 
-.oath-card.completed {
-    border-color: var(--accent-rot);
-    opacity: 0.6;
-}
-
 .oath-title {
     font-family: var(--font-prose);
     font-size: 0.85rem;
     color: var(--accent-bone);
     font-weight: 600;
     margin-bottom: 3px;
-}
-
-.oath-title.completed {
-    color: var(--accent-rot-bright);
-    text-decoration: line-through;
 }
 
 .oath-desc {
@@ -764,9 +760,6 @@ header {
     margin-top: 4px;
     color: var(--accent-soul);
 }
-
-.oath-status.complete { color: var(--accent-rot-bright); }
-.oath-status.failed { color: var(--accent-danger-bright); }
 
 .oath-empty {
     font-family: var(--font-prose);
@@ -888,14 +881,15 @@ header {
                 <!-- Populated by JS -->
             </div>
 
+            <!-- RITUAL SECTION -->
             <div class="ritual-section">
                 <div class="ritual-label">Ritual Circle</div>
-                <div class="ritual-slot active" id="ritual-slot-1">
+                <div class="ritual-slot active" id="ritual-slot-1" onclick="selectRitualSlot('ritual-slot-1')">
                     <div style="color:var(--accent-tear-bright); font-size:0.8rem;">Soul Binding</div>
                     <div class="ritual-requires">Requires: 3 Risen · Major Soul</div>
                 </div>
-                <div class="ritual-slot" id="ritual-slot-2">No ritual prepared</div>
-                <button class="btn-small">⊕ Prepare Ritual</button>
+                <div class="ritual-slot" id="ritual-slot-2" onclick="selectRitualSlot('ritual-slot-2')">No ritual prepared</div>
+                <button class="btn-small" onclick="prepareRitual()">⊕ Prepare Ritual</button>
             </div>
 
             <button class="btn-visualize" onclick="requestVisualize()">◆ VISUALIZE</button>
@@ -932,7 +926,6 @@ header {
         </div>
 
         <div class="chronicle-input">
-            <!--<span class="input-prompt">MORGAR ○ ›</span>-->
             <input type="text" class="input-field" id="action-input" placeholder="What do you do?" onkeydown="handleKey(event)">
             <button class="btn-submit" onclick="sendAction()">TRANSMIT</button>
         </div>
@@ -1040,13 +1033,12 @@ const tts = {
     queue: [],
     speaking: false,
 
-    // Preferred voice names in priority order (dark, deep, authoritative)
     PREFERRED: [
         'Google UK English Male',
         'Microsoft George',
         'Microsoft Stefan',
-        'Daniel',           // macOS deep British male
-        'Arthur',           // macOS
+        'Daniel',           
+        'Arthur',           
         'Google UK English Female',
         'Microsoft David',
         'Alex',
@@ -1057,12 +1049,10 @@ const tts = {
         const set = () => {
             this.voices = window.speechSynthesis.getVoices();
             if (!this.voices.length) return;
-            // Try preferred voices first
             for (const name of this.PREFERRED) {
                 const match = this.voices.find(v => v.name === name);
                 if (match) { this.voice = match; break; }
             }
-            // Fallback: first English voice
             if (!this.voice) {
                 this.voice = this.voices.find(v => v.lang.startsWith('en')) || this.voices[0];
             }
@@ -1073,16 +1063,12 @@ const tts = {
 
     speak(text) {
         if (!this.enabled || !text) return;
-        // Strip markdown symbols and clean up
-        const clean = text
-            .replace(/[#*_`~]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
+        const clean = text.replace(/[#*_`~]/g, '').replace(/\s+/g, ' ').trim();
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(clean);
         if (this.voice) utter.voice = this.voice;
-        utter.rate  = 0.82;   // slow, deliberate
-        utter.pitch = 0.75;   // low, grave
+        utter.rate  = 0.82;   
+        utter.pitch = 0.75;   
         utter.volume = 0.95;
         window.speechSynthesis.speak(utter);
     },
@@ -1104,10 +1090,7 @@ const tts = {
 };
 
 // ── SPELL SFX ──
-// Interprets AI-authored JSON sound descriptors and renders them with Tone.js.
-// The AI writes the synthesis parameters; this engine executes them.
 const spellSFX = {
-
     async play(json) {
         await Tone.start();
         let spec;
@@ -1117,7 +1100,6 @@ const spellSFX = {
         const layers = Array.isArray(spec) ? spec : [spec];
         const allNodes = [];
 
-        // Build shared effects chain from spec
         const buildFx = (fxDef = {}) => {
             const nodes = [];
             let last = Tone.getDestination();
@@ -1149,7 +1131,6 @@ const spellSFX = {
             allNodes.push(...fxNodes);
 
             const scheduleLayer = () => {
-                // ── Synth layer ──
                 if (layer.synth) {
                     const s = layer.synth;
                     const poly = Array.isArray(s.notes) && s.notes.length > 1;
@@ -1174,14 +1155,12 @@ const spellSFX = {
                             : new Tone.Synth(opts).connect(fxInput);
                         const notes = poly ? s.notes : (s.notes?.[0] ?? s.note ?? 'A2');
                         synth.triggerAttackRelease(notes, s.duration ?? '4n');
-                        // Optional frequency ramp (for descending/ascending sweeps)
                         if (s.rampTo && !poly) {
                             synth.frequency.rampTo(s.rampTo, s.rampTime ?? 1);
                         }
                     }
                     allNodes.push(synth);
 
-                    // Optional sequence of additional hits on the same synth
                     if (s.sequence) {
                         s.sequence.forEach(({ note, notes: ns, time, duration }) => {
                             setTimeout(() => {
@@ -1192,7 +1171,6 @@ const spellSFX = {
                     }
                 }
 
-                // ── Noise layer ──
                 if (layer.noise) {
                     const n = layer.noise;
                     const noise = new Tone.NoiseSynth({
@@ -1202,7 +1180,6 @@ const spellSFX = {
                     allNodes.push(noise);
                     noise.triggerAttackRelease(n.duration ?? '8n');
 
-                    // Burst pattern (e.g. bone clatter)
                     if (n.bursts) {
                         n.bursts.forEach(t => setTimeout(() => noise.triggerAttackRelease('32n'), t * 1000));
                     }
@@ -1216,7 +1193,6 @@ const spellSFX = {
             else scheduleLayer();
         }
 
-        // Cleanup all nodes after the sound finishes
         setTimeout(() => allNodes.forEach(n => { try { n.dispose(); } catch(_) {} }), maxDuration * 1000 + 500);
     }
 };
@@ -1284,7 +1260,6 @@ function init() {
     const opening = `The wind comes down from the Greyfall highlands carrying the smell of cold stone and something older — a wrongness in the air that Morgar has learned to read like weather.\n\nThe tear opened three days ago at the Northern Pass. Small, as tears go. A ragged seam in the fabric of the world, barely wide enough for the things that have been spilling through. Two border soldiers are already dead. A shepherd's dog. Something else that left marks in the rock no natural creature makes.\n\nMorgar stands at the edge of the settlement's torchlight, looking north. Bonehelm and Silt, two of his older risen — a soldier and a quarryman — wait behind him in the dark, patient as only the dead can be. Somewhere above, the tear pulses with a light that has no color.\n\nThe village headman is watching from his doorway, lantern in hand, certain that the thing he hired is only marginally better than the things he hired it to stop.`;
     displayMessage(opening, null);
 
-    // Starting quest
     const startingOath = { title: 'Seal the Northern Pass Tear', desc: 'The headman has hired Morgar to close the tear and stop whatever is coming through. The village will not survive another three days.', pay: '40g', status: 'active' };
     gameState.oaths.push(startingOath);
     gameState.active_oath = startingOath;
@@ -1308,7 +1283,7 @@ function switchSpellSchool(school, btn) {
     renderSpells(school);
 }
 
-// ── SPELLS ──
+// ── SPELLS & RITUALS ──
 function renderSpells(school) {
     const list = document.getElementById('spell-list');
     list.innerHTML = '';
@@ -1330,6 +1305,30 @@ function renderSpells(school) {
 function castSpell(name) {
     const input = document.getElementById('action-input');
     input.value = `Cast ${name}`;
+    input.focus();
+}
+
+function selectRitualSlot(slotId) {
+    document.querySelectorAll('.ritual-slot').forEach(el => el.classList.remove('active'));
+    document.getElementById(slotId).classList.add('active');
+}
+
+function prepareRitual() {
+    const activeSlot = document.querySelector('.ritual-slot.active');
+    if (!activeSlot) return;
+
+    const nameElement = activeSlot.querySelector('div');
+    const ritualName = nameElement ? nameElement.innerText.trim() : activeSlot.innerText.trim();
+    
+    const input = document.getElementById('action-input');
+    if (ritualName.toLowerCase() === 'no ritual prepared') {
+        input.value = '';
+        input.placeholder = "No ritual selected...";
+        setTimeout(() => input.placeholder = "What do you do?", 2000);
+        return;
+    }
+
+    input.value = `I begin the ${ritualName} ritual.`;
     input.focus();
 }
 
@@ -1356,11 +1355,9 @@ function drawMap() {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Dark background
     ctx.fillStyle = '#030507';
     ctx.fillRect(0, 0, W, H);
 
-    // Fog texture
     for (let i = 0; i < 800; i++) {
         const x = Math.random() * W;
         const y = Math.random() * H;
@@ -1368,7 +1365,6 @@ function drawMap() {
         ctx.fillRect(x, y, 1, 1);
     }
 
-    // Region labels (background)
     const regions = [
         { name: 'ASHWOOD', x: 0.25, y: 0.25, color: regionColors.ashwood },
         { name: 'GREYFALL', x: 0.72, y: 0.22, color: regionColors.greyfall },
@@ -1383,7 +1379,6 @@ function drawMap() {
         ctx.fillText(r.name, r.x * W - 20, r.y * H);
     });
 
-    // Draw connections
     gameState.mapNodes.forEach(node => {
         node.connections.forEach(targetId => {
             const target = gameState.mapNodes.find(n => n.id === targetId);
@@ -1398,7 +1393,6 @@ function drawMap() {
         });
     });
 
-    // Draw tear (void pulse)
     const tearPulse = (Date.now() % 2000) / 2000;
     ctx.beginPath();
     ctx.arc(0.45 * W, 0.2 * H, 4 + tearPulse * 3, 0, Math.PI * 2);
@@ -1409,7 +1403,6 @@ function drawMap() {
     ctx.fillStyle = '#aa44ff';
     ctx.fill();
 
-    // Draw nodes
     gameState.mapNodes.forEach(node => {
         const x = node.x * W;
         const y = node.y * H;
@@ -1469,7 +1462,6 @@ function updateUI() {
     document.getElementById('current-location-header').textContent = gameState.location.toUpperCase();
     document.getElementById('turn-counter').textContent = gameState.turn;
 
-    // Standing
     ['ashwood', 'greyfall', 'heartlands', 'coast'].forEach(r => {
         const el = document.getElementById(`stand-${r}`);
         const val = gameState.standing[r];
@@ -1477,13 +1469,8 @@ function updateUI() {
         el.className = 'standing-val' + (val > 0 ? ' pos' : val < 0 ? ' neg' : '');
     });
 
-    // Oaths
     renderOaths();
-
-    // Army list
     renderArmyList();
-
-    // Inventory
     renderInventory();
 }
 
@@ -1519,31 +1506,40 @@ function renderInventory() {
 
 function renderOaths() {
     const list = document.getElementById('oaths-list');
-    if (gameState.oaths.length === 0) {
+    if (!list) return;
+
+    // Filter the oaths so we only keep ones that aren't completed
+    const activeOaths = gameState.oaths.filter(oath => oath.status !== 'complete');
+
+    if (activeOaths.length === 0) {
         list.innerHTML = `<div class="oath-empty">No vow has been sworn. The dead are unburdened.</div>`;
         return;
     }
-    list.innerHTML = gameState.oaths.map(oath => `
-        <div class="oath-card ${oath.status === 'complete' ? 'completed' : ''}">
-            <div class="oath-title ${oath.status === 'complete' ? 'completed' : ''}">${oath.title}</div>
-            <div class="oath-desc">${oath.desc}</div>
-            ${oath.pay ? `<div class="oath-desc" style="color:var(--accent-bone-dim); margin-top:2px;">Pay: ${oath.pay}</div>` : ''}
-            <div class="oath-status ${oath.status}">${oath.status.toUpperCase()}</div>
-        </div>
-    `).join('');
+    
+    list.innerHTML = activeOaths.map(oath => {
+        const payHtml = oath.pay 
+            ? `<div class="oath-desc" style="color:var(--accent-bone-dim); margin-top:2px;">Pay: ${oath.pay}</div>` 
+            : '';
+
+        return `
+            <div class="oath-card">
+                <div class="oath-title">${oath.title}</div>
+                <div class="oath-desc">${oath.desc}</div>
+                ${payHtml}
+                <div class="oath-status ${oath.status}">${oath.status.toUpperCase()}</div>
+            </div>
+        `;
+    }).join('');
 }
 
 // PARSE TAGS
 function parseTags(text) {
-    // 1. HP: [HP: +/-N]
     const hpMatch = text.match(/\[HP:\s*([+-]?\d+)\]/i);
     if (hpMatch) gameState.hp = Math.max(0, Math.min(100, gameState.hp + parseInt(hpMatch[1])));
 
-    // 2. SOUL: [SOUL: +/-N]
     const soulMatch = text.match(/\[SOUL:\s*([+-]?\d+)\]/i);
     if (soulMatch) gameState.soul = Math.max(0, Math.min(100, gameState.soul + parseInt(soulMatch[1])));
 
-    // 3. LOC: [LOC: Location | Region]
     const locMatch = text.match(/\[LOC:\s*([^|\]]+)(?:\s*\|\s*([^\]]+))?\]/i);
     if (locMatch) {
         gameState.location = locMatch[1].trim();
@@ -1551,18 +1547,15 @@ function parseTags(text) {
         addMapNode(gameState.location, gameState.region);
     }
 
-    // 4. STAND: [STAND: Region | +/-N]
     const standMatches = [...text.matchAll(/\[STAND:\s*([^|\]]+)\|\s*([+-]?\d+)\]/gi)];
     standMatches.forEach(m => {
         const regionInput = m[1].trim().toLowerCase();
         const change = parseInt(m[2]);
-        // Maps input like "Ashwood" or "The Ashwood" to keys: ashwood, greyfall, heartlands, coast
         Object.keys(gameState.standing).forEach(key => {
             if (regionInput.includes(key)) gameState.standing[key] += change;
         });
     });
 
-    // 5. Vow Start: [Vow_Start: <name> | Obj: <description> | Pay: <g>]
     const vowStart = text.match(/\[Vow_Start:\s*([^|\]]+)\|\s*Obj:\s*([^|\]]+)\|\s*Pay:\s*([^\]]+)\]/i);
     if (vowStart) {
         const newOath = { title: vowStart[1].trim(), desc: vowStart[2].trim(), pay: vowStart[3].trim(), status: 'active' };
@@ -1570,8 +1563,6 @@ function parseTags(text) {
         gameState.active_oath = newOath;
     }
 
-
-    // 6. Vow End: [Vow_End: <n>] — fuzzy match so AI partial titles still resolve
     const vowEnd = text.match(/\[Vow_End:\s*([^\]]+)\]/i);
     if (vowEnd) {
         const key = vowEnd[1].trim().toLowerCase();
@@ -1585,18 +1576,14 @@ function parseTags(text) {
         if (oath) {
             oath.status = 'complete';
             if (gameState.active_oath === oath) gameState.active_oath = null;
-            // Removed the automatic gold addition here to prevent double-dipping. 
-            // The [GOLD: +N] tag will handle the reward.
         }
     }
 
-    // 6b. GOLD: [GOLD: +/-N]
     const goldMatch = text.match(/\[GOLD:\s*([+-]?\d+)\]/i);
     if (goldMatch) {
         gameState.gold = Math.max(0, (gameState.gold || 0) + parseInt(goldMatch[1]));
     }
 
-    // 6c. ITEM: [ITEM: + Name] or [ITEM: - Name]
     const itemMatches = [...text.matchAll(/\[ITEM:\s*([+-])\s*([^\]]+)\]/gi)];
     itemMatches.forEach(m => {
         if (!gameState.inventory) gameState.inventory = [];
@@ -1614,20 +1601,17 @@ function parseTags(text) {
         }
     });
 
-    // 7. Combat: [Combat: Start/End]
     const combatMatch = text.match(/\[Combat:\s*(Start|End)\]/i);
     if (combatMatch) {
         gameState.inCombat = (combatMatch[1].toLowerCase() === 'start');
         musicEngine.onCombatTag(combatMatch[1].toLowerCase());
     }
 
-    // 8. SFX: [SFX: {JSON}]
     const sfxMatch = text.match(/\[SFX:\s*(\{[\s\S]*?\}|\[[\s\S]*?\])\s*\]/i);
     if (sfxMatch) {
         try { spellSFX.play(sfxMatch[1].trim()); } catch(e) { console.warn("SFX Parse Error", e); }
     }
 
-    // 9. RAISE (Legacy Mechanic Support)
     const raiseMatch = text.match(/\[RAISE:\s*([^|]+)\|\s*WAS:\s*([^|]+)\|\s*MEM:\s*([^\]]+)\]/i);
     if (raiseMatch) {
         gameState.army.push({
@@ -1641,7 +1625,6 @@ function parseTags(text) {
         gameState.armySize = gameState.army.length;
     }
 
-    // 10. BIND: [BIND: DemonName | KIND: type | NATURE: text]
     const bindMatch = text.match(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*NATURE:\s*([^\]]+)\]/i);
     if (bindMatch) {
         gameState.army.push({
@@ -1656,13 +1639,11 @@ function parseTags(text) {
         gameState.armySize = gameState.army.length;
     }
 
-     // 11. UNIT HP: [UNIT_HP: Name | +/-N]
     const unitHpMatches = [...text.matchAll(/\[UNIT_HP:\s*([^|]+)\|\s*([+-]?\d+)\]/gi)];
     unitHpMatches.forEach(m => {
         const unitName = m[1].trim().toLowerCase();
         const change = parseInt(m[2]);
         
-        // Find unit (allow partial matches in case AI misspells)
         let unitIndex = gameState.army.findIndex(u => u.name.toLowerCase() === unitName);
         if (unitIndex === -1) {
             unitIndex = gameState.army.findIndex(u => u.name.toLowerCase().includes(unitName) || unitName.includes(u.name.toLowerCase()));
@@ -1671,16 +1652,14 @@ function parseTags(text) {
         if (unitIndex !== -1) {
             gameState.army[unitIndex].hp += change;
             
-            // Check for death
             if (gameState.army[unitIndex].hp <= 0) {
                 gameState.army.splice(unitIndex, 1);
                 gameState.armySize = gameState.army.length;
             } else if (gameState.army[unitIndex].hp > 100) {
-                gameState.army[unitIndex].hp = 100; // Cap max HP
+                gameState.army[unitIndex].hp = 100;
             }
         }
     });
-
 }
 
 function addMapNode(label, region) {
@@ -1699,7 +1678,6 @@ function addMapNode(label, region) {
         prevNode.connections.push(newNode.id);
         gameState.mapNodes.push(newNode);
     }
-    // Set current
     gameState.mapNodes.forEach(n => { if (n.status === 'current') n.status = 'safe'; });
     const current = gameState.mapNodes.find(n => n.label.toLowerCase() === label.toLowerCase());
     if (current) current.status = 'current';
@@ -1707,38 +1685,20 @@ function addMapNode(label, region) {
 
 function stripTags(text) {
     if (!text) return "";
-
     return text
-        // 1. Core Stats
         .replace(/\[HP:\s*[+-]?\d+\]/gi, '')
         .replace(/\[SOUL:\s*[+-]?\d+\]/gi, '')
-
-        // 2. World & Standing
         .replace(/\[LOC:\s*[^\]]+\]/gi, '')
         .replace(/\[STAND:\s*[^\]]+\]/gi, '')
-
-        // 3. Vows / Oaths
         .replace(/\[Vow_Start:\s*[^\]]+\]/gi, '')
         .replace(/\[Vow_End:\s*[^\]]+\]/gi, '')
-
-        // 4. Gold & Inventory
         .replace(/\[GOLD:\s*[+-]?\d+\]/gi, '')
         .replace(/\[ITEM:\s*[+-]\s*[^\]]+\]/gi, '')
-
-        // 5. Combat & Atmosphere
         .replace(/\[Combat:\s*[^\]]+\]/gi, '')
-
-        // 6. Visuals & Army
         .replace(/\[RAISE:\s*[^\]]+\]/gi, '')
         .replace(/\[BIND:\s*[^\]]+\]/gi, '')
-
-        // 6b. Individual Unit HP
         .replace(/\[UNIT_HP:\s*[^\]]+\]/gi, '')
-
-        // 7. SFX (Handles potential nested JSON brackets)
         .replace(/\[SFX:\s*[\s\S]*?(?:\}|\])\s*\]/gi, '')
-
-        // Final cleanup of extra whitespace
         .trim();
 }
 
@@ -1866,19 +1826,16 @@ function buildContext() {
     ctx += `HP: ${gameState.hp}/100 | Soul: ${gameState.soul} | Gold: ${gameState.gold}\n`;
     ctx += `Location: ${gameState.location} (${gameState.region})\n`;
     
-    // Army
     const armyStr = gameState.army.length > 0 
         ? gameState.army.map(u => `${u.name} (HP: ${u.hp}/100) [${u.was}]`).join(', ') 
         : 'None';
     ctx += `Army (${gameState.armySize}/${gameState.armyMax}): ${armyStr}\n`;
     
-    // Inventory
     const invStr = gameState.inventory && gameState.inventory.length > 0 
         ? gameState.inventory.map(i => `${i.name} (x${i.qty})`).join(', ') 
         : 'Empty';
     ctx += `Inventory: ${invStr}\n`;
     
-    // Active Vow
     if (gameState.active_oath) {
         ctx += `Active Vow: ${gameState.active_oath.title}\n`;
         ctx += `Vow Objective: ${gameState.active_oath.desc}\n`;
@@ -1888,7 +1845,6 @@ function buildContext() {
     }
 
     ctx += `=== RECENT HISTORY ===\n`;
-    // Grab the last 10 messages (excluding the current action just pushed)
     const recentLogs = conversationLog.slice(-11, -1);
     if (recentLogs.length === 0) {
         ctx += `(Start of adventure)\n`;
@@ -1911,13 +1867,11 @@ async function sendAction() {
     gameState.turn++;
     turnCount++;
 
-    // Push current action to log
     conversationLog.push({ role: 'user', content: action });
 
     document.getElementById('loading').classList.add('visible');
     document.querySelector('.btn-submit').disabled = true;
 
-    // Build the dynamic context window
     const currentContext = buildContext();
 
     try {
@@ -1926,7 +1880,7 @@ async function sendAction() {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
                 system_prompt: SYSTEM_PROMPT,
-                context: currentContext, // Pass the dynamically built context here
+                context: currentContext,
                 player_action: action
             })
         });
@@ -1934,13 +1888,11 @@ async function sendAction() {
         if (data.error) throw new Error(data.error);
         const responseText = data.text;
 
-        // Save AI response to log
         conversationLog.push({ role: 'assistant', content: responseText });
 
         const signal = parseTags(responseText);
         const clean = stripTags(responseText);
 
-        // Check for image generation tag and call painter API
         const imgMatch = responseText.match(/\[GENERATE_IMAGE:\s*([^\]]+)\]/i);
         let imageB64 = null;
         if (imgMatch) {
@@ -2030,7 +1982,6 @@ function loadGame() {
                 conversationLog = data.conversationLog;
                 turnCount = data.turnCount || 0;
                 updateUI();
-                // Rebuild chronicle display
                 const body = document.getElementById('chronicle-body');
                 body.innerHTML = '';
                 for (let i = 0; i < conversationLog.length; i += 2) {
@@ -2051,7 +2002,6 @@ function loadGame() {
     input.click();
     document.body.removeChild(input);
 }
-
 
 // MUSIC SYSTEM
 const AMBIENT_TRACKS = [
