@@ -821,18 +821,34 @@ header {
     <div class="header-title">Necromancer</div>
     <div class="header-meta">LOCATION: <span id="current-location-header">GREYFALL</span></div>
     <div style="display:flex; align-items:center; gap:12px;">
-        <button id="music-toggle" onclick="musicEngine.toggle()" style="
-            font-family: var(--font-ui);
-            font-size: 0.55rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            background: transparent;
-            border: 1px solid var(--accent-bone-dim);
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.2s;
-        ">♪ MUSIC</button>
+        <div style="display:flex; align-items:center; gap:4px;">
+            <button id="music-toggle" onclick="musicEngine.toggle()" style="
+                font-family: var(--font-ui);
+                font-size: 0.55rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                padding: 4px 10px;
+                background: transparent;
+                border: 1px solid var(--accent-bone-dim);
+                color: var(--text-dim);
+                cursor: pointer;
+                transition: all 0.2s;
+            ">♪ MUSIC</button>
+            <button id="music-next" onclick="musicEngine.next()" title="Next Track" style="
+                font-family: var(--font-ui);
+                font-size: 0.55rem;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                padding: 4px 8px;
+                background: transparent;
+                border: 1px solid var(--accent-bone-dim);
+                color: var(--text-dim);
+                cursor: pointer;
+                transition: all 0.2s;
+                opacity: 0.5;
+                pointer-events: none;
+            ">⏭</button>
+        </div>
         <button id="tts-toggle" onclick="tts.toggle()" style="
             font-family: var(--font-ui);
             font-size: 0.55rem;
@@ -1602,6 +1618,7 @@ function parseTags(text) {
     const combatMatch = text.match(/\[Combat:\s*(Start|End)\]/i);
     if (combatMatch) {
         gameState.inCombat = (combatMatch[1].toLowerCase() === 'start');
+        musicEngine.onCombatTag(combatMatch[1].toLowerCase());
     }
 
     // 8. SFX: [SFX: {JSON}]
@@ -2066,15 +2083,16 @@ const musicEngine = (() => {
     battleAudio.volume = 0;
 
     function fadeTo(audio, targetVol, duration = 3000) {
+        if (audio.fadeTimer) clearInterval(audio.fadeTimer);
         const steps = 30;
         const interval = duration / steps;
         const delta = (targetVol - audio.volume) / steps;
-        const timer = setInterval(() => {
+        audio.fadeTimer = setInterval(() => {
             audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
             if ((delta > 0 && audio.volume >= targetVol) ||
                 (delta < 0 && audio.volume <= targetVol)) {
                 audio.volume = targetVol;
-                clearInterval(timer);
+                clearInterval(audio.fadeTimer);
                 if (targetVol === 0) audio.pause();
             }
         }, interval);
@@ -2094,15 +2112,28 @@ const musicEngine = (() => {
 
     function updateBtn() {
         const btn = document.getElementById('music-toggle');
+        const nextBtn = document.getElementById('music-next');
         if (!btn) return;
         if (enabled) {
             btn.textContent = inCombat ? '⚔ MUSIC' : '♪ MUSIC';
             btn.style.borderColor = 'var(--accent-bone)';
             btn.style.color = 'var(--accent-bone)';
+            if (nextBtn) {
+                nextBtn.style.borderColor = 'var(--accent-bone)';
+                nextBtn.style.color = 'var(--accent-bone)';
+                nextBtn.style.opacity = '1';
+                nextBtn.style.pointerEvents = 'auto';
+            }
         } else {
             btn.textContent = '♪ MUSIC';
             btn.style.borderColor = 'var(--accent-bone-dim)';
             btn.style.color = 'var(--text-dim)';
+            if (nextBtn) {
+                nextBtn.style.borderColor = 'var(--accent-bone-dim)';
+                nextBtn.style.color = 'var(--text-dim)';
+                nextBtn.style.opacity = '0.5';
+                nextBtn.style.pointerEvents = 'none';
+            }
         }
     }
 
@@ -2117,6 +2148,16 @@ const musicEngine = (() => {
             }
             updateBtn();
         },
+        next() {
+            if (!enabled) return;
+            if (inCombat) {
+                battleIdx = (battleIdx + 1) % BATTLE_TRACKS.length;
+                playBattle();
+            } else {
+                ambientIdx = (ambientIdx + 1) % AMBIENT_TRACKS.length;
+                playAmbient();
+            }
+        },
         onCombatTag(state) {
             inCombat = (state === 'start');
             if (!enabled) return;
@@ -2125,9 +2166,9 @@ const musicEngine = (() => {
                 setTimeout(() => playBattle(), 1000);
             } else {
                 fadeTo(battleAudio, 0);
-                battleIdx = (battleIdx + 1) % 4;
+                battleIdx = (battleIdx + 1) % BATTLE_TRACKS.length;
                 setTimeout(() => {
-                    ambientIdx = (ambientIdx + 1) % 4;
+                    ambientIdx = (ambientIdx + 1) % AMBIENT_TRACKS.length;
                     playAmbient();
                 }, 1500);
             }
