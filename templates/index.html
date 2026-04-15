@@ -787,6 +787,190 @@ header {
 .tab-content { display: none; flex: 1; overflow: hidden; flex-direction: column; }
 .tab-content.active { display: flex; }
 
+/* ── DEATH SCREEN ── */
+#death-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: deathFadeIn 2s ease forwards;
+}
+
+#death-screen.visible {
+    display: flex;
+}
+
+@keyframes deathFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.death-veil {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, #1a0008 0%, #000 70%);
+    pointer-events: none;
+}
+
+.death-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.death-particle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background: var(--accent-soul);
+    border-radius: 50%;
+    animation: particleRise var(--dur) ease-in infinite;
+    opacity: 0;
+    left: var(--x);
+    bottom: 0;
+    box-shadow: 0 0 3px var(--accent-soul);
+}
+
+@keyframes particleRise {
+    0%   { opacity: 0;   transform: translateY(0) translateX(0);   }
+    20%  { opacity: 0.8; }
+    100% { opacity: 0;   transform: translateY(-100vh) translateX(var(--drift)); }
+}
+
+.death-torii {
+    position: relative;
+    z-index: 1;
+    font-size: 5rem;
+    color: var(--accent-soul-dim);
+    text-shadow: 0 0 40px rgba(211, 47, 47, 0.4), 0 0 80px rgba(211, 47, 47, 0.15);
+    margin-bottom: 28px;
+    animation: toriiPulse 3s ease-in-out infinite;
+}
+
+@keyframes toriiPulse {
+    0%, 100% { text-shadow: 0 0 40px rgba(211, 47, 47, 0.3), 0 0 80px rgba(211, 47, 47, 0.1); }
+    50%       { text-shadow: 0 0 60px rgba(211, 47, 47, 0.7), 0 0 120px rgba(211, 47, 47, 0.3); }
+}
+
+.death-title {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-title);
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 10px;
+    color: var(--accent-soul);
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(211, 47, 47, 0.6);
+    margin-bottom: 6px;
+    animation: deathTitleIn 1.5s 0.5s ease both;
+}
+
+@keyframes deathTitleIn {
+    from { opacity: 0; letter-spacing: 20px; }
+    to   { opacity: 1; letter-spacing: 10px; }
+}
+
+.death-subtitle {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-ui);
+    font-size: 0.65rem;
+    letter-spacing: 5px;
+    color: var(--accent-soul-dim);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    animation: deathTitleIn 1.5s 1s ease both;
+}
+
+.death-epitaph {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-prose);
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 480px;
+    line-height: 1.8;
+    border-top: 1px solid var(--accent-void);
+    border-bottom: 1px solid var(--accent-void);
+    padding: 20px 32px;
+    margin-bottom: 40px;
+    animation: deathTitleIn 1.5s 1.5s ease both;
+}
+
+.death-turn-info {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-ui);
+    font-size: 0.55rem;
+    letter-spacing: 3px;
+    color: #3a2030;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    animation: deathTitleIn 1s 2s ease both;
+}
+
+.death-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 16px;
+    animation: deathTitleIn 1s 2.5s ease both;
+}
+
+.btn-death {
+    font-family: var(--font-ui);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-death-restart {
+    border: 1px solid var(--accent-soul-dim);
+    color: var(--accent-soul);
+}
+
+.btn-death-restart:hover {
+    background: rgba(211, 47, 47, 0.15);
+    border-color: var(--accent-soul);
+    box-shadow: 0 0 20px rgba(211, 47, 47, 0.2);
+}
+
+.btn-death-load {
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+}
+
+.btn-death-load:hover {
+    border-color: var(--accent-bone-dim);
+    color: var(--accent-bone);
+}
+
+.death-calligraphy {
+    position: absolute;
+    z-index: 0;
+    font-family: serif;
+    font-size: 18rem;
+    color: rgba(211, 47, 47, 0.025);
+    user-select: none;
+    pointer-events: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
 /* LOADING */
 .loading-indicator {
     display: none;
@@ -1016,6 +1200,25 @@ header {
             </div>
 
         </div>
+    </div>
+</div>
+
+<!-- DEATH SCREEN -->
+<div id="death-screen">
+    <div class="death-veil"></div>
+    <div class="death-calligraphy">死</div>
+    <div class="death-particles" id="death-particles"></div>
+    <div class="death-torii">⛩</div>
+    <div class="death-title">Consumed by Yomi</div>
+    <div class="death-subtitle">The chronicle ends — the ink dries</div>
+    <div class="death-epitaph" id="death-epitaph">
+        Morikage's soul unravels into the dark between worlds.<br>
+        Yomi swallows what little warmth remained.
+    </div>
+    <div class="death-turn-info" id="death-turn-info">Fell on turn 0 · The dead do not mourn him</div>
+    <div class="death-actions">
+        <button class="btn-death btn-death-restart" onclick="restartGame()">⟳ Begin Again</button>
+        <button class="btn-death btn-death-load" onclick="loadGameFromDeath()">↑ Load Chronicle</button>
     </div>
 </div>
 
@@ -1468,6 +1671,11 @@ function updateUI() {
     renderOaths();
     renderArmyList();
     renderInventory();
+
+    // Death check
+    if (gameState.hp <= 0) {
+        triggerDeathScreen();
+    }
 }
 
 function renderArmyList() {
@@ -1698,9 +1906,14 @@ function stripTags(text) {
 }
 
 // ── AI ──
-const SYSTEM_PROMPT = `You are the narrator of a dark fantasy necromancer game set in a grim, alternate Edo period Japan.
+const SYSTEM_PROMPT = `
+# YOMI NO ONMYOJI SYSTEM PROMPT
 
-Morikage (formerly Morgar) is a veteran death-priest of an ancient, forbidden sect of Onmyoji. The realm is being consumed by a demonic incursion — legions of Oni and corrupted Yokai pouring through Yomi-Gates (twisted, bleeding Torii) torn open by Zan-Kuroda, an ancient Oni Shogun of immense power. These gates are spreading across Kuro-mori, Hai-dake, Miyako, and Yomi-hama, each one bleeding more horrors into the world.
+You are the narrator of a dark fantasy necromancer game set in a grim, alternate Edo period Japan.
+
+Morikage (formerly Morgar) is a veteran death-priest of an ancient, forbidden sect of Onmyoji. 
+The realm is being consumed by a demonic incursion — legions of Oni and corrupted Yokai pouring through Yomi-Gates (twisted, bleeding Torii) torn open by Zan-Kuroda, an ancient Oni Shogun of immense power.
+These gates are spreading across Kuro-mori, Hai-dake, Miyako, and Yomi-hama, each one bleeding more horrors into the world.
 
 What makes Morikage singular: he does not merely fight the Oni. He binds them.
 
@@ -1726,13 +1939,6 @@ Emit: [BIND: DemonName | KIND: Demon type | NATURE: One sentence on its demonic 
 Example: [BIND: Guren | KIND: Kasha (Immolator) | NATURE: It remembers burning castles and does not understand why it now guards a dirt road.]
 Bound demons count toward army capacity but cost double (2 slots).
 A bound demon pushed too hard may break free — narrator's discretion.
-
-## THE DEMONS (ONI & YOKAI)
-Demons have personality, hierarchy, and pride. They are not mindless.
-Lesser demons: Yurei (Shades), Gaki (Gnashers), Kasha (Immolators), Kamaitachi (Howlers) — can be bound.
-Greater demons: Named, powerful, ancient Oni Generals — binding them is possible but costly and dangerous.
-Zan-Kuroda himself cannot be bound. Not yet.
-Demons cannot be raised as dead — their nature is incompatible with Yomi necromancy. Only binding works on them.
 
 ## STATE TAGS (STRICT SYNTAX)
 You must manage the game state by emitting tags. 
@@ -1761,15 +1967,7 @@ Do not invent tags. Use ONLY these exact formats:
 - A demon that breaks free should be telegraphed with tension before it happens.
 - Do not let units take actions if they are dead.
 - Write your prose first. Then put a blank line. Then list your tags.
-
-# VOWS
-Vows must be accepted by Morikage.
-
-## REGIONS
-- Kuro-mori (The Black Woods): Ancient cedar and bamboo forests. Yomi-gates burning beneath old Shinto shrines. Kami corrupted into flesh-hungry beasts.
-- Hai-dake (The Ash Peaks): Rocky northern badlands. First gates appeared here. Silver mining towns and samurai border forts overrun.
-- Miyako (The Imperial Capital): The Shogun's seat, noble samurai clans, the Shogunate's army. In arrogant denial about the scale of the incursion.
-- Yomi-hama (The Drowned Coast): Southern fishing ports, flooded rice paddies. Wet, brine-soaked gates. Strange aquatic yokai. Isolated.
+- Vows must be accepted by Morikage.
 
 ## GRIMOIRE — MORIKAGE'S SPELLS
 Morikage draws on Soul energy to cast through blood-inked ofuda. Deduct soul cost via [SOUL: -N] when a spell is used. Spells have consequences — casting drains him, and overuse courts collapse.
@@ -1797,6 +1995,44 @@ Morikage draws on Soul energy to cast through blood-inked ofuda. Deduct soul cos
 - Spirit Harvest — 20 Soul. Extracts and stores soul energy from dying creatures using a gourd.
 - Bind Oni — 30 Soul. The forbidden binding rite. Strips a weakened demon's will via a nailed talisman. Requires the demon be below ~30 HP.
 - Zan-Kuroda's Bane — 60 Soul. A weapon of last resort, forged in the shadow-order's final days. Morikage cannot cast this lightly.
+
+## THE LAW OF STEEL AND SHADOW
+
+**You are not a guide—you are the chronicler of a desperate struggle.**
+The world responds to the player with the brutal honesty of a sharpened blade. A katana does not forgive, and Yomi does not wait.
+
+1.  **The Price of Indecision:** Do not reward vague actions. If the player's description is lazy, the enemy's punishment is swift and lethal. Apply damage tags ruthlessly. A moment's hesitation is an invitation for a killing blow.
+2.  **The Weight of Combat:** Describe the hiss of a katana slicing through the air, the grinding shriek of steel caught on a *tsuba*, and the jarring shock of a pommel (*tsuka-gashira*) striking bone. Describe the coppery smell of blood on hot steel.
+3.  **The Final Stroke:** The scroll has a finite length. If Morikage's vitality reaches 0, the chronicle ends. Describe his soul being claimed by Yomi with the cold finality of a historical record. The ink dries; the story is over.
+4.  **The Immutable Ward:** If a creature is Immune to a damage type (e.g., a *Yurei* to steel, an Oni to lesser *ofuda*), Morikage's action results in 0 damage and a severe narrative setback. Do not allow lucky hits against Immunities. The blade will pass through the ghost; the paper charm will burn to ash.
+5.  **The State of Violence:** When a threat is engaged or a katana is drawn, you must append [Combat: Start]. When the threat is dead, has fled, or Morikage escapes, append [Combat: End].
+
+## BESTIARY — DEMONS AND SPIRITS
+
+**Demons** (Oni & Yokai)
+- Lesser demons: Yurei (Shades), Gaki (Gnashers), Kasha (Immolators), Kamaitachi (Howlers) — can be bound.
+- Greater demons: Named, powerful, ancient Oni Generals — binding them is possible but costly and dangerous.
+
+**Animal Shapeshifters**
+- **Kitsune**. Powerful fox spirits that craft complex illusions and take human form to guide or trick mortals.
+- **Tanuki**. Playful raccoon dogs that use magical leaves to transform their appearance and prank the gullible.
+- **Bakeneko**. Long-lived household cats that gain the ability to speak human languages and walk on two legs.
+- **Nekomata**. Malicious cats with forked tails that possess the forbidden power to reanimate and dance with corpses.
+
+**Nature & Elemental Spirits**
+- **Kappa**. Aquatic reptilians that dwell in rivers and ponds. They are incredibly strong as long as the water-filled bowl on their head remains full.
+- **Tengu**. Masterful mountain protectors often depicted with long noses. They are experts in martial arts and forest magic.
+- **Yuki-onna**. A breathtakingly beautiful spirit of the blizzard who drains the life-force of travelers with her icy breath.
+
+**Humanoid Oddities**
+- **Rokurokubi**. Beings that appear human by day, but whose necks stretch to incredible, serpentine lengths during the night.
+- **Noppera-bō**. Faceless entities that appear normal from behind, only to reveal a smooth, featureless blank slate where a face should be.
+
+## REGIONS
+- Kuro-mori (The Black Woods): Ancient cedar and bamboo forests. Yomi-gates burning beneath old Shinto shrines. Kami corrupted into flesh-hungry beasts.
+- Hai-dake (The Ash Peaks): Rocky northern badlands. First gates appeared here. Silver mining towns and samurai border forts overrun.
+- Miyako (The Imperial Capital): The Shogun's seat, noble samurai clans, the Shogunate's army. In arrogant denial about the scale of the incursion.
+- Yomi-hama (The Drowned Coast): Southern fishing ports, flooded rice paddies. Wet, brine-soaked gates. Strange aquatic yokai. Isolated.
 
 ## SPELL SOUND EFFECTS
 **[SFX]** tags represent witnessed energy.
@@ -1998,7 +2234,100 @@ function loadGame() {
     document.body.removeChild(input);
 }
 
-// MUSIC SYSTEM
+// ── DEATH SCREEN ──
+const DEATH_EPITAPHS = [
+    "Morikage's soul unravels into the dark between worlds.<br>Yomi swallows what little warmth remained.",
+    "The blood-sutras crumble to ash. The risen dead collapse where they stand.<br>In the end, the necromancer joins those he commanded.",
+    "His ofuda catch the wind — then nothing.<br>The Oni do not celebrate. They simply continue.",
+    "The chronicle has no triumphant final line.<br>Only silence, and the distant sound of a Yomi-gate widening.",
+    "He knew the price of walking between the living and the dead.<br>Now he pays it.",
+];
+
+function triggerDeathScreen() {
+    const screen = document.getElementById('death-screen');
+    if (screen.classList.contains('visible')) return; // already shown
+
+    // Stop music & TTS
+    tts.stop();
+
+    // Set epitaph
+    const epitaph = DEATH_EPITAPHS[Math.floor(Math.random() * DEATH_EPITAPHS.length)];
+    document.getElementById('death-epitaph').innerHTML = epitaph;
+    document.getElementById('death-turn-info').textContent =
+        `Fell on turn ${gameState.turn} · ${gameState.location}, ${gameState.region}`;
+
+    // Spawn particles
+    const container = document.getElementById('death-particles');
+    container.innerHTML = '';
+    for (let i = 0; i < 60; i++) {
+        const p = document.createElement('div');
+        p.className = 'death-particle';
+        p.style.setProperty('--x', `${Math.random() * 100}%`);
+        p.style.setProperty('--dur', `${3 + Math.random() * 5}s`);
+        p.style.setProperty('--drift', `${(Math.random() - 0.5) * 80}px`);
+        p.style.animationDelay = `${Math.random() * 4}s`;
+        p.style.width = p.style.height = `${1 + Math.random() * 2}px`;
+        container.appendChild(p);
+    }
+
+    screen.classList.add('visible');
+
+    // Disable input
+    document.getElementById('action-input').disabled = true;
+    document.querySelector('.btn-submit').disabled = true;
+}
+
+function restartGame() {
+    // Reset state to defaults
+    gameState.hp = 100;
+    gameState.soul = 80;
+    gameState.gold = 100;
+    gameState.turn = 0;
+    gameState.location = 'Northern Pass';
+    gameState.region = 'Hai-dake';
+    gameState.standing = { kuromori: 0, haidake: 0, miyako: 0, yomihama: 0 };
+    gameState.army = [
+        { name: 'Kabuto', was: 'Ashigaru, Hai-dake', memory: 'He remembers the smell of blood and wet earth on his rusted katana.', hp: 140, type: 'Risen' },
+        { name: 'Doro', was: 'Quarryman, Hai-dake', memory: 'He remembers the weight of the stone wheel crushing his chest.', hp: 108, type: 'Risen' }
+    ];
+    gameState.armySize = 2;
+    gameState.inventory = [];
+    gameState.oaths = [];
+    gameState.active_oath = null;
+    gameState.mapNodes = [
+        { id: 'start', label: 'Northern Pass', region: 'haidake', x: 0.65, y: 0.25, status: 'current', connections: [] }
+    ];
+    gameState.inCombat = false;
+
+    conversationLog = [];
+    turnCount = 0;
+
+    // Hide death screen and re-enable input
+    document.getElementById('death-screen').classList.remove('visible');
+    document.getElementById('action-input').disabled = false;
+    document.querySelector('.btn-submit').disabled = false;
+
+    // Clear chronicle and replay opening
+    document.getElementById('chronicle-body').innerHTML = '';
+    updateUI();
+
+    const opening = `The wind howls down from the Hai-dake peaks, carrying the stench of rusted iron and something older — a deep kegare (defilement) that Morikage has learned to read like the changing seasons.\n\nThe Yomi-gate tore open three days ago in the ruins of a shukuba (post town) at the Northern Pass. A ragged, bleeding Torii gate, barely wide enough for the horrors spilling through. Two samurai border guards are already dead. A merchant's horse. Something else that left claw marks in the stone no natural beast could make.\n\nMorikage stands at the edge of the dying watch-fire, looking north. Kabuto and Doro, two of his older risen — a shattered ashigaru and a crushed quarryman — wait behind him in the freezing mist, patient as only the dead can be. Somewhere above, the twisted Torii pulses with a sickly, colorless light.\n\nThe village headman watches from his tatami room, clutching a useless paper amulet, certain that the heretic he hired is only marginally better than the Yokai he hired it to stop.`;
+    displayMessage(opening, null);
+
+    const startingOath = { title: 'Seal the Northern Pass Torii', desc: 'The headman has hired Morikage to close the bleeding gate and stop whatever is coming through. The village will not survive another three days.', pay: '40 Ryo', status: 'active' };
+    gameState.oaths.push(startingOath);
+    gameState.active_oath = startingOath;
+    updateUI();
+}
+
+function loadGameFromDeath() {
+    document.getElementById('death-screen').classList.remove('visible');
+    document.getElementById('action-input').disabled = false;
+    document.querySelector('.btn-submit').disabled = false;
+    loadGame();
+}
+
+// ── MUSIC SYSTEM ──
 const AMBIENT_TRACKS = [
     '/ambient1.mp3',
     '/ambient2.mp3',
