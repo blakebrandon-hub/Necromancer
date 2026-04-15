@@ -1560,16 +1560,16 @@ function parseTags(text) {
         if (oath) {
             oath.status = 'complete';
             if (gameState.active_oath === oath) gameState.active_oath = null;
-            if (oath.pay) {
-                const g = parseInt(String(oath.pay).replace(/[^\d]/g, ''));
-                if (!isNaN(g) && g > 0) gameState.gold = Math.max(0, (gameState.gold || 0) + g);
-            }
+            // Removed the automatic gold addition here to prevent double-dipping. 
+            // The [GOLD: +N] tag will handle the reward.
         }
     }
 
     // 6b. GOLD: [GOLD: +/-N]
     const goldMatch = text.match(/\[GOLD:\s*([+-]?\d+)\]/i);
-    if (goldMatch) gameState.gold = Math.max(0, (gameState.gold || 0) + parseInt(goldMatch[1]));
+    if (goldMatch) {
+        gameState.gold = Math.max(0, (gameState.gold || 0) + parseInt(goldMatch[1]));
+    }
 
     // 6c. ITEM: [ITEM: + Name] or [ITEM: - Name]
     const itemMatches = [...text.matchAll(/\[ITEM:\s*([+-])\s*([^\]]+)\]/gi)];
