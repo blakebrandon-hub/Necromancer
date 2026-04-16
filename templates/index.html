@@ -235,18 +235,18 @@ header {
     margin-top: 4px;
 }
 
-/* RITUAL CIRCLE */
-.ritual-section {
+/* CRAFTING SECTION (Mortar & Pestle) */
+.craft-section {
     border-top: 1px solid var(--border);
     padding: 10px 12px;
-    background: rgba(211, 47, 47, 0.04);
+    background: rgba(108, 155, 61, 0.04);
 }
 
-.ritual-label {
+.craft-label {
     font-family: var(--font-ui);
     font-size: 0.55rem;
     letter-spacing: 3px;
-    color: var(--accent-soul-dim);
+    color: var(--accent-rot-bright);
     text-transform: uppercase;
     margin-bottom: 8px;
     display: flex;
@@ -254,40 +254,43 @@ header {
     gap: 6px;
 }
 
-.ritual-label::before {
-    content: '⛩';
-    color: var(--accent-soul);
-    font-size: 0.5rem;
+.craft-label::before {
+    content: '⚗️';
+    font-size: 0.6rem;
 }
 
-.ritual-slot {
+.craft-slot {
     background: var(--bg-entry);
     border: 1px solid var(--border-void);
     padding: 8px 10px;
     margin-bottom: 6px;
-    font-family: var(--font-prose);
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    font-style: italic;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.ritual-slot:hover {
-    border-color: var(--accent-soul-dim);
+.craft-slot:hover {
+    border-color: var(--accent-rot-bright);
 }
 
-.ritual-slot.active {
-    color: var(--accent-tear-bright);
-    border-color: var(--accent-tear);
-    background: rgba(170, 0, 51, 0.08);
+.craft-slot.active {
+    border-color: var(--accent-rot);
+    background: rgba(108, 155, 61, 0.08);
 }
 
-.ritual-requires {
+.craft-item-name {
+    font-family: var(--font-prose);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.craft-item-name.remedy { color: var(--accent-rot-bright); }
+.craft-item-name.soul { color: var(--accent-soul); }
+
+.craft-requires {
     font-family: var(--font-ui);
     font-size: 0.5rem;
-    color: var(--accent-soul-dim);
-    margin-top: 3px;
+    color: var(--text-dim);
     letter-spacing: 1px;
 }
 
@@ -306,8 +309,8 @@ header {
 }
 
 .btn-small:hover {
-    border-color: var(--accent-soul);
-    color: var(--accent-soul);
+    border-color: var(--accent-rot-bright);
+    color: var(--accent-rot-bright);
 }
 
 /* BOTTOM BUTTONS */
@@ -1060,15 +1063,18 @@ header {
                 <!-- Populated by JS -->
             </div>
 
-            <!-- RITUAL SECTION -->
-            <div class="ritual-section">
-                <div class="ritual-label">Ofuda Ritual</div>
-                <div class="ritual-slot active" id="ritual-slot-1" onclick="selectRitualSlot('ritual-slot-1')">
-                    <div style="color:var(--accent-tear-bright); font-size:0.8rem;">Blood-Sutra Binding</div>
-                    <div class="ritual-requires">Requires: 3 Risen · Major Soul</div>
+            <!-- CRAFTING SECTION -->
+            <div class="craft-section" id="craft-section">
+                <div class="craft-label">Mortar & Pestle</div>
+                <div class="craft-slot active" id="craft-slot-remedy" onclick="selectCraftSlot('craft-slot-remedy', 'Remedy')">
+                    <div class="craft-item-name remedy">Remedy</div>
+                    <div class="craft-requires">Req: 1x Medicinal Herb, 1x Clean Water</div>
                 </div>
-                <div class="ritual-slot" id="ritual-slot-2" onclick="selectRitualSlot('ritual-slot-2')">No ritual prepared</div>
-                <button class="btn-small" onclick="prepareRitual()">⊕ Prepare Ritual</button>
+                <div class="craft-slot" id="craft-slot-soul" onclick="selectCraftSlot('craft-slot-soul', 'Soul Essence')">
+                    <div class="craft-item-name soul">Soul Essence</div>
+                    <div class="craft-requires">Req: 1x Yomi Ash, 1x Corpse-flower</div>
+                </div>
+                <button class="btn-small" onclick="attemptCraft()">⚗️ Grind & Brew</button>
             </div>
 
             <button class="btn-visualize" onclick="requestVisualize()">◆ VISUALIZE</button>
@@ -1398,7 +1404,7 @@ const spellSFX = {
 // ── STATE ──
 const gameState = {
     hp: 100,
-    soul: 80,
+    soul: 100,
     armySize: 2,
     armyMax: 20,
     gold: 100,
@@ -1410,7 +1416,13 @@ const gameState = {
         { name: 'Kabuto', was: 'Ashigaru, Hai-dake', mem: 'He remembers the smell of blood and wet earth on his rusted katana.', hp: 140, type: 'Risen' },
         { name: 'Doro', was: 'Quarryman, Hai-dake', mem: 'He remembers the weight of the stone wheel crushing his chest.', hp: 108, type: 'Risen' }
     ],
-    inventory: [],
+    inventory: [
+        { name: "Katana", qty: 1 }, 
+        { name: "Medicinal Herb", qty: 1 },
+        { name: "Clean Water", qty: 1 },
+        { name: "Yomi Ash", qty: 1 },
+        { name: "Corpse-flower", qty: 1 }
+    ],
     oaths: [],
     active_oath: null,
     mapNodes: [
@@ -1448,6 +1460,7 @@ const spells = {
 
 let conversationLog = [];
 let turnCount = 0;
+let selectedCraftItem = 'Remedy';
 
 // ── INIT ──
 function init() {
@@ -1481,7 +1494,7 @@ function switchSpellSchool(school, btn) {
     renderSpells(school);
 }
 
-// ── SPELLS & RITUALS ──
+// ── SPELLS & CRAFTING ──
 function renderSpells(school) {
     const list = document.getElementById('spell-list');
     list.innerHTML = '';
@@ -1506,27 +1519,15 @@ function castSpell(name) {
     input.focus();
 }
 
-function selectRitualSlot(slotId) {
-    document.querySelectorAll('.ritual-slot').forEach(el => el.classList.remove('active'));
+function selectCraftSlot(slotId, itemName) {
+    document.querySelectorAll('.craft-slot').forEach(el => el.classList.remove('active'));
     document.getElementById(slotId).classList.add('active');
+    selectedCraftItem = itemName;
 }
 
-function prepareRitual() {
-    const activeSlot = document.querySelector('.ritual-slot.active');
-    if (!activeSlot) return;
-
-    const nameElement = activeSlot.querySelector('div');
-    const ritualName = nameElement ? nameElement.innerText.trim() : activeSlot.innerText.trim();
-    
+function attemptCraft() {
     const input = document.getElementById('action-input');
-    if (ritualName.toLowerCase() === 'no ritual prepared') {
-        input.value = '';
-        input.placeholder = "No ritual selected...";
-        setTimeout(() => input.placeholder = "What do you do?", 2000);
-        return;
-    }
-
-    input.value = `I begin the ${ritualName} ritual.`;
+    input.value = `I use my mortar and pestle to craft a ${selectedCraftItem}.`;
     input.focus();
 }
 
@@ -1761,9 +1762,15 @@ function parseTags(text) {
 
     const vowStart = text.match(/\[Vow_Start:\s*([^|\]]+)\|\s*Obj:\s*([^|\]]+)\|\s*Pay:\s*([^\]]+)\]/i);
     if (vowStart) {
-        const newOath = { title: vowStart[1].trim(), desc: vowStart[2].trim(), pay: vowStart[3].trim(), status: 'active' };
-        gameState.oaths.push(newOath);
-        gameState.active_oath = newOath;
+        const newTitle = vowStart[1].trim().toLowerCase();
+        const alreadyExists = gameState.oaths.some(o => o.title.toLowerCase() === newTitle && o.status !== 'complete');
+        if (!alreadyExists) {
+            // Demote any current active oath to pending so only one is active
+            gameState.oaths.forEach(o => { if (o.status === 'active') o.status = 'pending'; });
+            const newOath = { title: vowStart[1].trim(), desc: vowStart[2].trim(), pay: vowStart[3].trim(), status: 'active' };
+            gameState.oaths.push(newOath);
+            gameState.active_oath = newOath;
+        }
     }
 
     const vowEnd = text.match(/\[Vow_End:\s*([^\]]+)\]/i);
@@ -1817,29 +1824,37 @@ function parseTags(text) {
 
     const raiseMatch = text.match(/\[RAISE:\s*([^|]+)\|\s*WAS:\s*([^|]+)\|\s*MEM:\s*([^\]]+)\]/i);
     if (raiseMatch) {
-        gameState.army.push({
-            name: raiseMatch[1].trim(),
-            was: raiseMatch[2].trim(),
-            region: gameState.region,
-            memory: raiseMatch[3].trim(),
-            hp: 100,
-            type: 'Yomi-Risen'
-        });
-        gameState.armySize = gameState.army.length;
+        const raiseName = raiseMatch[1].trim();
+        const alreadyRaised = gameState.army.some(u => u.name.toLowerCase() === raiseName.toLowerCase());
+        if (!alreadyRaised) {
+            gameState.army.push({
+                name: raiseName,
+                was: raiseMatch[2].trim(),
+                region: gameState.region,
+                memory: raiseMatch[3].trim(),
+                hp: 100,
+                type: 'Yomi-Risen'
+            });
+            gameState.armySize = gameState.army.length;
+        }
     }
 
     const bindMatch = text.match(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*NATURE:\s*([^\]]+)\]/i);
     if (bindMatch) {
-        gameState.army.push({
-            name: bindMatch[1].trim(),
-            was: `Bound Yokai — ${bindMatch[2].trim()}`,
-            region: gameState.region,
-            memory: bindMatch[3].trim(),
-            hp: 100,
-            type: 'Bound',
-            slots: 2
-        });
-        gameState.armySize = gameState.army.length;
+        const bindName = bindMatch[1].trim();
+        const alreadyBound = gameState.army.some(u => u.name.toLowerCase() === bindName.toLowerCase());
+        if (!alreadyBound) {
+            gameState.army.push({
+                name: bindName,
+                was: `Bound Yokai — ${bindMatch[2].trim()}`,
+                region: gameState.region,
+                memory: bindMatch[3].trim(),
+                hp: 100,
+                type: 'Bound',
+                slots: 2
+            });
+            gameState.armySize = gameState.army.length;
+        }
     }
 
     const unitHpMatches = [...text.matchAll(/\[UNIT_HP:\s*([^|]+)\|\s*([+-]?\d+)\]/gi)];
@@ -1925,7 +1940,7 @@ What makes Morikage singular: he does not merely fight the Oni. He binds them.
 
 ## VOICE
 Third-person. Dark, precise, atmospheric. No overwrought flourishes.
-100-180 words per response. Let weight exist. Focus on Edo-period aesthetics: blood on tatami mats, smoldering paper talismans (ofuda), rusted katana blades, and the scent of incense and rot.
+75-150 words per response. Let weight exist. Focus on Edo-period aesthetics: blood on tatami mats, smoldering paper talismans (ofuda), rusted katana blades, and the scent of incense and rot.
 
 ## ARMY MECHANIC
 When Morikage defeats a human or mundane creature, he may raise it.
@@ -1939,6 +1954,22 @@ Emit: [BIND: DemonName | KIND: Demon type | NATURE: One sentence on its demonic 
 Example: [BIND: Guren | KIND: Kasha (Immolator) | NATURE: It remembers burning castles and does not understand why it now guards a dirt road.]
 Bound demons count toward army capacity but cost double (2 slots).
 A bound demon pushed too hard may break free — narrator's discretion.
+
+## CRAFTING (MORTAR & PESTLE)
+Morikage carries a mortar and pestle to grind herbs and Yomi-tainted reagents into consumables.
+Recipes:
+- **Remedy** (Restores 30 HP): Requires [1x Medicinal Herb, 1x Clean Water]
+- **Soul Essence** (Restores 50 Soul): Requires [1x Yomi Ash, 1x Corpse-flower]
+
+Rules for Crafting:
+- When Morikage attempts to craft, CHECK HIS INVENTORY.
+- If he lacks the EXACT required ingredients, the craft FAILS. Describe the failure and do NOT emit item tags.
+- If he has the ingredients, describe the grinding/brewing process, then emit tags to remove ingredients and add the product.
+- Example Success: [ITEM: - Medicinal Herb] [ITEM: - Clean Water] [ITEM: + Remedy]
+
+Rules for Consuming:
+- When Morikage drinks a Remedy or Soul Essence, remove it from his inventory and apply the stat change.
+- Example: [ITEM: - Remedy] [HP: +30]
 
 ## STATE TAGS (STRICT SYNTAX)
 You must manage the game state by emitting tags. 
@@ -1967,7 +1998,6 @@ Do not invent tags. Use ONLY these exact formats:
 - A demon that breaks free should be telegraphed with tension before it happens.
 - Do not let units take actions if they are dead.
 - Write your prose first. Then put a blank line. Then list your tags.
-- Vows must be accepted by Morikage.
 
 ## GRIMOIRE — MORIKAGE'S SPELLS
 Morikage draws on Soul energy to cast through blood-inked ofuda. Deduct soul cost via [SOUL: -N] when a spell is used. Spells have consequences — casting drains him, and overuse courts collapse.
@@ -1995,6 +2025,12 @@ Morikage draws on Soul energy to cast through blood-inked ofuda. Deduct soul cos
 - Spirit Harvest — 20 Soul. Extracts and stores soul energy from dying creatures using a gourd.
 - Bind Oni — 30 Soul. The forbidden binding rite. Strips a weakened demon's will via a nailed talisman. Requires the demon be below ~30 HP.
 - Zan-Kuroda's Bane — 60 Soul. A weapon of last resort, forged in the shadow-order's final days. Morikage cannot cast this lightly.
+
+## OATHS
+- Most oaths should be finished in 3-5 turns.
+- More complex oaths can take longer.
+- Oaths must be accepted by Morikage.
+- Work can be found in villages.
 
 ## THE LAW OF STEEL AND SHADOW
 
@@ -2033,6 +2069,16 @@ The world responds to the player with the brutal honesty of a sharpened blade. A
 - Hai-dake (The Ash Peaks): Rocky northern badlands. First gates appeared here. Silver mining towns and samurai border forts overrun.
 - Miyako (The Imperial Capital): The Shogun's seat, noble samurai clans, the Shogunate's army. In arrogant denial about the scale of the incursion.
 - Yomi-hama (The Drowned Coast): Southern fishing ports, flooded rice paddies. Wet, brine-soaked gates. Strange aquatic yokai. Isolated.
+
+## Travel Speed
+- Traveling from one village to another can happen in 3-4 turns.
+
+## Restoring Soul & Health
+- Waiting — restores 10-12 soul
+- Meditating — restores 18-20 soul
+- Soul Essence restores 50 soul
+- Remedy restores 30 HP
+- Sleeping — fully restores health and soul
 
 ## SPELL SOUND EFFECTS
 **[SFX]** tags represent witnessed energy.
@@ -2291,7 +2337,14 @@ function restartGame() {
         { name: 'Doro', was: 'Quarryman, Hai-dake', memory: 'He remembers the weight of the stone wheel crushing his chest.', hp: 108, type: 'Risen' }
     ];
     gameState.armySize = 2;
-    gameState.inventory = [];
+    gameState.inventory = [
+        { name: "Katana", qty: 1 }, 
+        { name: "Remedy", qty: 1 }, 
+        { name: "Medicinal Herb", qty: 1 },
+        { name: "Clean Water", qty: 1 },
+        { name: "Yomi Ash", qty: 1 },
+        { name: "Corpse-flower", qty: 1 }
+    ];
     gameState.oaths = [];
     gameState.active_oath = null;
     gameState.mapNodes = [
