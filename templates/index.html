@@ -1808,16 +1808,27 @@ function parseTags(text) {
     const soulMatch = text.match(/\[SOUL:\s*([+-]?\d+)\]/i);
     if (soulMatch) gameState.soul = Math.max(0, Math.min(100, gameState.soul + parseInt(soulMatch[1])));
     
-    const expMatch = text.match(/\[EXP:\s*\+?(\d+)\]/i);
-    if (expMatch) {
-        const gained = parseInt(expMatch[1]);
-        gameState.exp += gained;
-        while (gameState.exp >= gameState.expNext) {
-            gameState.exp -= gameState.expNext;
-            gameState.level++;
-            gameState.skillPoints++;
-            gameState.expNext = Math.floor(gameState.expNext * 1.5);
+    const expMatches = [...text.matchAll(/\[EXP:\s*([+-]?\d+)\]/gi)];
+    let leveledUp = false;
+    expMatches.forEach(m => {
+        const gained = parseInt(m[1]);
+        if (gained > 0) { // Ignore negative EXP tags entirely to prevent the AI from breaking the leveling system
+            gameState.exp += gained;
+            while (gameState.exp >= gameState.expNext) {
+                gameState.exp -= gameState.expNext;
+                gameState.level++;
+                gameState.skillPoints++;
+                gameState.expNext = Math.floor(gameState.expNext * 1.5);
+                leveledUp = true;
+            }
         }
+    });
+
+    if (leveledUp) {
+        setTimeout(() => {
+            displayMessage(`<em style="color:var(--accent-gold);">Morikage's mastery over death deepens. He has reached Level ${gameState.level}. (+1 SP)</em>`, null, null);
+            updateUI();
+        }, 100);
     }
 
     // 2. Map & Standing
@@ -1983,7 +1994,7 @@ function stripTags(text) {
     return text
         .replace(/\[HP:\s*[+-]?\d+\]/gi, '')
         .replace(/\[SOUL:\s*[+-]?\d+\]/gi, '')
-        .replace(/\[EXP:\s*\+?\d+\]/gi, '')
+        .replace(/\[EXP:\s*[+-]?\d+\]/gi, '')
         .replace(/\[LOC:\s*[^\]]+\]/gi, '')
         .replace(/\[STAND:\s*[^\]]+\]/gi, '')
         .replace(/\[Vow_Start:\s*[^\]]+\]/gi, '')
@@ -2024,6 +2035,7 @@ Third-person. Dark, precise, atmospheric. No overwrought flourishes.
 ## EXPERIENCE & PROGRESSION
 When Morikage defeats enemies, completes vows, or survives horrors, he gains Experience (EXP).
 Emit: [EXP: +N] (e.g., +20 for a lesser demon, +50 for a boss, +10 for a mundane foe).
+*CRITICAL: NEVER subtract EXP. NEVER manage level ups. The system handles level thresholds automatically. ONLY award positive EXP.*
 
 ## COMBAT & ENEMIES
 During combat, track the enemy's health by emitting the ENEMY tag. 
@@ -2059,7 +2071,7 @@ Do not invent tags. Use ONLY these exact formats:
 
 1. [HP: +/-N] — Morikage's vitality
 2. [SOUL: +/-N] — Soul energy (deduct when casting)
-3. [EXP: +N] — Experience points gained
+3. [EXP: +N] — Experience points gained (NEVER subtract, NEVER emit [EXP: -N])
 4. [LOC: Location Name | Region] — When Morikage moves
 5. [STAND: Region | +/-N] — Regional standing change
 6. [Vow_Start: <title> | Obj: <description> | Pay: <Ng>] — When accepting a vow.
