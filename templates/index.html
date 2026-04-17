@@ -92,7 +92,8 @@ header {
 /* ── MAIN LAYOUT ── */
 .game-layout {
     display: grid;
-    grid-template-columns: 220px 1fr 280px;
+    /* minmax(0, 1fr) forces the grid column to scale down and prevents image blowout */
+    grid-template-columns: 220px minmax(0, 1fr) 280px;
     flex: 1;
     overflow: hidden;
 }
@@ -207,6 +208,41 @@ header {
     color: var(--accent-gold);
     margin-top: 2px;
     letter-spacing: 1px;
+}
+
+/* RITUAL SECTION */
+.ritual-section {
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    background: rgba(211, 47, 47, 0.03);
+}
+
+.btn-ritual {
+    width: 100%;
+    font-family: var(--font-ui);
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 8px;
+    background: rgba(211, 47, 47, 0.05);
+    border: 1px solid var(--accent-soul-dim);
+    color: var(--accent-soul);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+}
+
+.btn-ritual:hover {
+    background: rgba(211, 47, 47, 0.15);
+    border-color: var(--accent-soul);
+    color: var(--accent-soul-bright);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+}
+
+.btn-ritual:active {
+    transform: translateY(1px);
+    box-shadow: none;
 }
 
 /* BESTIARY tab */
@@ -340,6 +376,10 @@ header {
     color: var(--accent-rot-bright);
 }
 
+.btn-small:active {
+    transform: translateY(1px);
+}
+
 /* BOTTOM BUTTONS */
 .panel-bottom-btns {
     display: flex;
@@ -364,6 +404,7 @@ header {
 
 .btn-bottom:last-child { border-right: none; }
 .btn-bottom:hover { color: var(--accent-bone); background: rgba(200, 184, 138, 0.04); }
+.btn-bottom:active { transform: translateY(1px); }
 
 .btn-visualize {
     width: 100%;
@@ -383,6 +424,10 @@ header {
 .btn-visualize:hover {
     background: rgba(211, 47, 47, 0.15);
     border-color: var(--accent-soul);
+}
+
+.btn-visualize:active {
+    transform: translateY(1px);
 }
 
 /* ── CENTER PANEL ── */
@@ -475,31 +520,62 @@ header {
 /* IMAGE */
 .scene-image {
     width: 100%;
-    max-height: 220px;
+    max-width: 100%; /* Ensures it doesn't stretch grid */
+    height: auto;
+    max-height: 240px;
     object-fit: cover;
     margin-bottom: 20px;
     border: 1px solid var(--border);
+    border-radius: 2px;
     filter: sepia(0.4) saturate(0.8) contrast(1.1);
     display: block;
 }
 
+/* QUICK ACTIONS */
+.quick-actions {
+    padding: 12px 20px 0;
+    background: var(--bg-panel);
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.btn-quick {
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 0;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-void);
+    color: var(--text-bone);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 2px;
+}
+
+.btn-quick:hover {
+    background: rgba(200, 184, 138, 0.08);
+    border-color: var(--accent-bone-dim);
+    color: var(--accent-bone);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.btn-quick:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
 /* INPUT */
 .chronicle-input {
-    border-top: 1px solid var(--border);
     padding: 12px 20px;
     background: var(--bg-panel);
     display: flex;
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
-}
-
-.input-prompt {
-    font-family: var(--font-ui);
-    font-size: 0.65rem;
-    color: var(--accent-bone-dim);
-    letter-spacing: 2px;
-    white-space: nowrap;
 }
 
 .input-field {
@@ -532,6 +608,10 @@ header {
 .btn-submit:hover {
     background: rgba(211, 47, 47, 0.2);
     border-color: var(--accent-soul);
+}
+
+.btn-submit:active {
+    transform: translateY(1px);
 }
 
 /* ── RIGHT PANEL ── */
@@ -1089,6 +1169,22 @@ header {
                 <!-- Populated by JS -->
             </div>
 
+            <!-- RITUAL SECTION -->
+            <div class="ritual-section" id="ritual-section">
+                <div class="craft-label" style="color:var(--accent-soul-bright);">
+                    <span style="font-size:0.7rem;">⛩</span> The Great Binding
+                </div>
+                <div style="font-family:var(--font-prose); font-size:0.7rem; color:var(--text-dim); margin-bottom:8px; line-height:1.4; font-style:italic;">
+                    A forbidden blood-sutra taught by the shadow-order. Requires two turns to chain a weakened Emissary.
+                </div>
+                <div style="font-family:var(--font-ui); font-size:0.55rem; color:var(--text-dim); margin-bottom:8px; letter-spacing:1px; text-transform:uppercase;">
+                    Status: <span id="ritual-status-text" style="color:var(--text-bone);">Not Prepared</span>
+                </div>
+                <button class="btn-ritual" id="btn-ritual" onclick="handleRitual()">
+                    ◆ Prepare Ritual
+                </button>
+            </div>
+
             <!-- CRAFTING SECTION -->
             <div class="craft-section" id="craft-section">
                 <div class="craft-label">Mortar & Pestle</div>
@@ -1136,7 +1232,13 @@ header {
             <!-- Messages appear here -->
         </div>
 
-        <div class="chronicle-input">
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <button class="btn-quick" onclick="quickAction('weapon')">⚔️ USE WEAPON</button>
+            <button class="btn-quick" onclick="quickAction('risen')">💀 SEND RISEN</button>
+        </div>
+
+        <div class="chronicle-input" style="border-top:none;">
             <input type="text" class="input-field" id="action-input" placeholder="What do you do?" onkeydown="handleKey(event)">
             <button class="btn-submit" onclick="sendAction()">TRANSMIT</button>
         </div>
@@ -1452,6 +1554,7 @@ const gameState = {
     turn: 0,
     standing: { kuromori: 0, haidake: 0, miyako: 0, yomihama: 0 },
     inCombat: false,
+    ritualStatus: 0, // 0 = Not Prepared, 1 = Prepared
     enemies: [], 
     army: [
         { name: 'Kabuto', was: 'Ashigaru, Hai-dake', memory: 'He remembers the smell of blood and wet earth on his rusted katana.', hp: 140, type: 'Risen' },
@@ -1529,6 +1632,26 @@ function switchSpellSchool(school, btn) {
     btn.classList.add('active');
     gameState.currentSpellSchool = school;
     renderSpells(school);
+}
+
+// ── ACTIONS & RITUALS ──
+function quickAction(type) {
+    const input = document.getElementById('action-input');
+    if (type === 'weapon') input.value = "I attack with my weapon.";
+    if (type === 'risen') input.value = "I command my risen to attack the enemy.";
+    sendAction();
+}
+
+function handleRitual() {
+    const input = document.getElementById('action-input');
+    if (gameState.ritualStatus === 0) {
+        input.value = "I spend my turn preparing The Great Binding blood-sutra.";
+        gameState.ritualStatus = 1;
+    } else {
+        input.value = "I perform The Great Binding on the weakened Emissary!";
+        gameState.ritualStatus = 0;
+    }
+    sendAction();
 }
 
 // ── SPELLS & CRAFTING ──
@@ -1699,6 +1822,19 @@ function updateUI() {
         el.className = 'standing-val' + (val > 0 ? ' pos' : val < 0 ? ' neg' : '');
     });
 
+    // Ritual Update
+    const rBtn = document.getElementById('btn-ritual');
+    const rTxt = document.getElementById('ritual-status-text');
+    if (gameState.ritualStatus === 1) {
+        rBtn.textContent = '◆ Perform Ritual';
+        rTxt.textContent = 'Prepared (Ready to perform)';
+        rTxt.style.color = 'var(--accent-soul-bright)';
+    } else {
+        rBtn.textContent = '◆ Prepare Ritual';
+        rTxt.textContent = 'Not Prepared';
+        rTxt.style.color = 'var(--text-bone)';
+    }
+
     renderOaths();
     renderArmyList();
     renderInventory();
@@ -1812,7 +1948,7 @@ function parseTags(text) {
     let leveledUp = false;
     expMatches.forEach(m => {
         const gained = parseInt(m[1]);
-        if (gained > 0) { // Ignore negative EXP tags entirely to prevent the AI from breaking the leveling system
+        if (gained > 0) { // Ignore negative EXP tags entirely
             gameState.exp += gained;
             while (gameState.exp >= gameState.expNext) {
                 gameState.exp -= gameState.expNext;
@@ -1900,14 +2036,22 @@ function parseTags(text) {
     });
 
     // 5. Combat & Enemies
+    const enemyMatches = [...text.matchAll(/\[ENEMY:\s*([^|]+)\|\s*HP:\s*(\d+)\/(\d+)\]/gi)];
+    if (enemyMatches.length > 0 && !gameState.inCombat) {
+        gameState.inCombat = true;
+        musicEngine.onCombatTag('start');
+    }
+
     const combatMatch = text.match(/\[Combat:\s*(Start|End)\]/i);
     if (combatMatch) {
         gameState.inCombat = (combatMatch[1].toLowerCase() === 'start');
         musicEngine.onCombatTag(combatMatch[1].toLowerCase());
-        if (!gameState.inCombat) gameState.enemies = []; // clear enemies on end
+        if (!gameState.inCombat) {
+            gameState.enemies = []; 
+            gameState.ritualStatus = 0; // Reset ritual when combat ends
+        }
     }
 
-    const enemyMatches = [...text.matchAll(/\[ENEMY:\s*([^|]+)\|\s*HP:\s*(\d+)\/(\d+)\]/gi)];
     enemyMatches.forEach(m => {
         const name = m[1].trim();
         const hp = parseInt(m[2]);
@@ -2041,15 +2185,22 @@ Emit: [EXP: +N] (e.g., +20 for a lesser demon, +50 for a boss, +10 for a mundane
 During combat, track the enemy's health by emitting the ENEMY tag. 
 Example: [ENEMY: Guren | HP: 45/100]
 When an enemy dies, emit its HP as 0. Example: [ENEMY: Guren | HP: 0/100]
+**CRITICAL: Whenever an Emissary or Boss appears, you MUST immediately emit [Combat: Start] and their [ENEMY: Name | HP: Max/Max] tag on the exact turn they arrive, even if they monologue first.**
 
 ## ARMY MECHANIC
 When Morikage defeats a human or mundane creature, he may raise it.
 Emit: [RAISE: Name | WAS: What they were | MEM: One sentence memory fragment]
 Example: [RAISE: Kenji | WAS: Ashigaru, Hai-dake | MEM: He remembers the taste of cold rice before the ambush in the bamboo grove.]
 
-## DEMON BINDING MECHANIC
+## DEMON BINDING MECHANIC & RITUALS
 Demons (Oni/Yokai) can be bound rather than destroyed — but only if Morikage weakens them first (below ~30 HP) and uses a binding spell (ofuda).
 Bound demons are more powerful than risen dead but harder to control. They remember what they are. They resent it. They also retain one unique combat ability.
+
+**To bind an Emissary, Morikage MUST spend 2 turns:**
+1. He must first "Prepare the Ritual" (The Great Binding). (Check Context: "Ritual Status: Prepared")
+2. He must then "Perform the Ritual" while the Emissary is below ~30 HP.
+When Morikage performs the ritual, his preparation is consumed. Adjudicate the success or failure of the binding based on the enemy's HP.
+
 Emit: [BIND: DemonName | KIND: Demon type | MEM: Demonic memory/character | ABILITY: Short description of unique combat ability]
 Example: [BIND: Guren | KIND: Kasha | MEM: It remembers burning castles and resents guarding a dirt road. | ABILITY: Hellfire Burst - can ignite enemies for extra damage.]
 Bound demons count toward army capacity but cost double (2 slots).
@@ -2142,7 +2293,7 @@ The world responds to the player with the brutal honesty of a sharpened blade. A
 
 As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emissaries — ancient, named demons — and then comes himself.
 
-**Emissaries arrive the moment the threshold is crossed. No delay. The narrator describes their arrival in the same turn Morikage's army reaches the threshold.**
+**CRITICAL:** Emissaries arrive the moment the threshold is crossed. No delay. On the EXACT TURN they arrive, you MUST emit [Combat: Start] and their [ENEMY: Name | HP: Max/Max] tag, even if they spend their first turn speaking.
 
 **Army max is 50. Thresholds: 10, 20, 30, 40, 50.**
 
@@ -2151,7 +2302,7 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 
 - **HP:** 160 | **Resistances:** Immune to ofuda below 20 Soul cost
 - **Abilities:** *Feather Storm* (rains black iron feathers, 15 damage to Morikage and all front-line units) | *Face-Steal* (disguises itself as a risen unit — Morikage must identify it before it executes a killing blow)
-- **Binding DC:** Medium. Can be bound with [Bind Oni] once below 30 HP.
+- **Binding DC:** Medium. Can be bound with a prepared ritual once below 30 HP.
 - **On Bind:** [BIND: Kurohane | KIND: Corrupted Tengu | MEM: It remembers guarding a mountain pass for three centuries and cannot explain why it now wears a dead woman's face. | ABILITY: Feather Storm - rains iron feathers on all enemies]
 
 ### Second Emissary — Mure-no-Hi (Army: 20)
@@ -2192,7 +2343,6 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 - If Morikage's army drops below a threshold after an Emissary has been triggered, the Emissary still came. Zan-Kuroda does not forgive numbers that were once reached.
 - Defeating or binding an Emissary earns [STAND: Region | +2] and a named reward at narrator's discretion.
 - Killing Zan-Kuroda ends the chronicle as a victory. Describe it with the same cold finality as a death — the ink dries on a different kind of ending.
-- Emissaries must have 1-3 turns of dialog before the fight begins.
 
 ## BESTIARY — DEMONS AND SPIRITS
 
@@ -2229,6 +2379,7 @@ function buildContext() {
     ctx += `Level: ${gameState.level} | EXP: ${gameState.exp}/${gameState.expNext} | Skill Points: ${gameState.skillPoints}\n`;
     ctx += `HP: ${gameState.hp}/100 | Soul: ${gameState.soul} | Gold (Ryo): ${gameState.gold}\n`;
     ctx += `Location: ${gameState.location} (${gameState.region})\n`;
+    ctx += `Ritual Status: ${gameState.ritualStatus === 1 ? 'Prepared (Ready to perform binding)' : 'Not Prepared'}\n`;
     
     // Unlocked Spells Context
     const unlockedSpells = [];
@@ -2502,6 +2653,7 @@ function restartGame() {
     gameState.active_oath = null;
     gameState.inCombat = false;
     gameState.enemies = [];
+    gameState.ritualStatus = 0;
 
     // Reset Spells
     Object.keys(spells).forEach(school => {
