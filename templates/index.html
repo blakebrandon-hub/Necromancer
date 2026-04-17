@@ -22,14 +22,15 @@
     --text-bone: #e8d0d0;
     --text-title: #d4b0b0;
 
-    --accent-soul: #d32f2f; /* Blood red for soul/blood-sutras */
+    --accent-soul: #d32f2f; 
     --accent-soul-dim: #661414;
+    --accent-soul-bright: #ff5252;
     --accent-void: #80002a;
-    --accent-rot: #4a6b2d; /* Pale green/rot */
+    --accent-rot: #4a6b2d; 
     --accent-rot-bright: #6c9b3d;
     --accent-danger: #8b1a1a;
     --accent-danger-bright: #e53935;
-    --accent-bone: #c8b88a; /* Old parchment/bamboo */
+    --accent-bone: #c8b88a; 
     --accent-bone-dim: #6b5f3a;
     --accent-tear: #aa0033;
     --accent-tear-bright: #ff3366;
@@ -154,13 +155,24 @@ header {
     padding: 7px 12px;
     border-bottom: 1px solid var(--border-dim);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: all 0.15s;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .spell-item:hover { background: rgba(211, 47, 47, 0.06); }
+
+.spell-item.locked {
+    opacity: 0.5;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px dashed var(--border-dim);
+}
+
+.spell-item.locked:hover {
+    border-color: var(--accent-gold);
+    opacity: 0.8;
+}
 
 .spell-info { display: flex; flex-direction: column; }
 
@@ -184,6 +196,16 @@ header {
     font-family: var(--font-ui);
     font-size: 0.55rem;
     color: var(--accent-soul);
+    letter-spacing: 1px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.spell-action-text {
+    font-size: 0.45rem;
+    color: var(--accent-gold);
+    margin-top: 2px;
     letter-spacing: 1px;
 }
 
@@ -228,6 +250,17 @@ header {
     line-height: 1.3;
 }
 
+.unit-ability {
+    font-family: var(--font-ui);
+    font-size: 0.55rem;
+    color: var(--accent-soul-bright);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    background: rgba(211, 47, 47, 0.06);
+    padding: 4px;
+    border-left: 1px solid var(--accent-soul);
+}
+
 .unit-hp {
     font-family: var(--font-ui);
     font-size: 0.5rem;
@@ -235,7 +268,7 @@ header {
     margin-top: 4px;
 }
 
-/* CRAFTING SECTION (Mortar & Pestle) */
+/* CRAFTING SECTION */
 .craft-section {
     border-top: 1px solid var(--border);
     padding: 10px 12px;
@@ -254,10 +287,7 @@ header {
     gap: 6px;
 }
 
-.craft-label::before {
-    content: '⚗️';
-    font-size: 0.6rem;
-}
+.craft-label::before { content: '⚗️'; font-size: 0.6rem; }
 
 .craft-slot {
     background: var(--bg-entry);
@@ -268,10 +298,7 @@ header {
     transition: all 0.2s;
 }
 
-.craft-slot:hover {
-    border-color: var(--accent-rot-bright);
-}
-
+.craft-slot:hover { border-color: var(--accent-rot-bright); }
 .craft-slot.active {
     border-color: var(--accent-rot);
     background: rgba(108, 155, 61, 0.08);
@@ -388,11 +415,7 @@ header {
     gap: 8px;
 }
 
-.chronicle-label::before {
-    content: '◆';
-    color: var(--accent-bone-dim);
-    font-size: 0.5rem;
-}
+.chronicle-label::before { content: '◆'; color: var(--accent-bone-dim); font-size: 0.5rem; }
 
 .chronicle-body {
     flex: 1;
@@ -425,10 +448,7 @@ header {
     padding-left: 2px;
 }
 
-.message-player span {
-    color: var(--accent-bone-dim);
-    margin-right: 6px;
-}
+.message-player span { color: var(--accent-bone-dim); margin-right: 6px; }
 
 .message-narrative {
     font-family: var(--font-prose);
@@ -522,13 +542,6 @@ header {
     background: var(--bg-panel);
 }
 
-/* MAP */
-.map-section {
-    border-bottom: 1px solid var(--border);
-    padding: 10px 14px;
-    flex-shrink: 0;
-}
-
 .section-label {
     font-family: var(--font-ui);
     font-size: 0.55rem;
@@ -541,25 +554,7 @@ header {
     gap: 6px;
 }
 
-.section-label::before {
-    content: '◆';
-    color: var(--accent-bone-dim);
-    font-size: 0.45rem;
-}
-
-.map-canvas {
-    width: 100%;
-    height: 160px;
-    background: var(--bg-void);
-    border: 1px solid var(--border-void);
-    position: relative;
-    overflow: hidden;
-}
-
-.map-canvas canvas {
-    width: 100%;
-    height: 100%;
-}
+.section-label::before { content: '◆'; color: var(--accent-bone-dim); font-size: 0.45rem; }
 
 /* STATUS */
 .status-scroll {
@@ -570,7 +565,7 @@ header {
 }
 
 .status-section {
-    padding: 10px 14px;
+    padding: 14px;
     border-bottom: 1px solid var(--border-dim);
 }
 
@@ -602,6 +597,7 @@ header {
     transition: width 0.5s ease;
 }
 
+.stat-bar-fill.gold { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold-dim); }
 .stat-bar-fill.soul { background: var(--accent-soul); box-shadow: 0 0 6px var(--accent-soul); }
 .stat-bar-fill.danger { background: var(--accent-danger-bright); box-shadow: 0 0 6px var(--accent-danger); }
 .stat-bar-fill.rot { background: var(--accent-rot-bright); box-shadow: 0 0 6px var(--accent-rot); }
@@ -639,6 +635,36 @@ header {
 .vital-box-value.hp { color: var(--accent-danger-bright); }
 .vital-box-value.soul { color: var(--accent-soul); }
 .vital-box-value.gold { color: var(--accent-gold); }
+
+/* COMBAT SECTION */
+.combat-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-dim);
+    background: rgba(211, 47, 47, 0.03);
+}
+
+.enemy-card {
+    background: var(--bg-entry);
+    border: 1px solid var(--accent-soul-dim);
+    padding: 6px 8px;
+    margin-bottom: 6px;
+}
+
+.enemy-name {
+    font-family: var(--font-prose);
+    font-size: 0.85rem;
+    color: var(--accent-danger-bright);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.enemy-hp-text {
+    font-family: var(--font-ui);
+    font-size: 0.55rem;
+    color: var(--text-dim);
+}
 
 /* INVENTORY */
 .inventory-section {
@@ -1118,20 +1144,20 @@ header {
 
     <!-- RIGHT: STATUS -->
     <div class="panel-right">
-
-        <!-- MAP -->
-        <div class="map-section">
-            <div class="section-label">Fog of War</div>
-            <div class="map-canvas">
-                <canvas id="map-canvas" width="252" height="160"></canvas>
-            </div>
-        </div>
-
         <div class="status-scroll">
 
-            <!-- LOCATION + VITALS -->
+            <!-- LOCATION + VITALS + EXP -->
             <div class="status-section">
                 <div class="section-label">Status</div>
+                
+                <div class="status-row" style="margin-bottom:8px;">
+                    <span class="status-row-label">Level <span id="level-val" style="color:var(--accent-gold); font-size:0.8rem;">1</span></span>
+                    <span class="status-row-value" style="color:var(--accent-gold); font-size:0.6rem; letter-spacing:1px;">SP: <span id="sp-val" style="font-size:0.8rem;">0</span></span>
+                </div>
+                <div class="stat-bar" style="margin-bottom:12px; height:2px;">
+                    <div class="stat-bar-fill gold" id="exp-bar" style="width:0%;"></div>
+                </div>
+
                 <div class="status-row">
                     <span class="status-row-label">Location</span>
                     <span class="status-row-value" id="current-location">Northern Pass</span>
@@ -1140,6 +1166,7 @@ header {
                     <span class="status-row-label">Region</span>
                     <span class="status-row-value soul" id="current-region">Hai-dake</span>
                 </div>
+                
                 <div class="vitals-grid">
                     <div class="vital-box">
                         <div class="vital-box-label">Vitality</div>
@@ -1155,6 +1182,14 @@ header {
                         <div class="vital-box-label" style="margin-bottom:0;">Ryo (Gold)</div>
                         <div class="vital-box-value gold" style="font-size:0.9rem;">⬡ <span id="gold-val">100</span></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ENEMY / COMBAT -->
+            <div class="combat-section" id="combat-section" style="display:none;">
+                <div class="section-label" style="color:var(--accent-danger-bright);">Active Threats</div>
+                <div id="enemy-list">
+                    <!-- Enemy bars injected here -->
                 </div>
             </div>
 
@@ -1405,16 +1440,22 @@ const spellSFX = {
 const gameState = {
     hp: 100,
     soul: 100,
+    level: 1,
+    exp: 0,
+    expNext: 100,
+    skillPoints: 0,
     armySize: 2,
-    armyMax: 20,
+    armyMax: 50,
     gold: 100,
     location: 'Northern Pass',
     region: 'Hai-dake',
     turn: 0,
     standing: { kuromori: 0, haidake: 0, miyako: 0, yomihama: 0 },
+    inCombat: false,
+    enemies: [], 
     army: [
-        { name: 'Kabuto', was: 'Ashigaru, Hai-dake', mem: 'He remembers the smell of blood and wet earth on his rusted katana.', hp: 140, type: 'Risen' },
-        { name: 'Doro', was: 'Quarryman, Hai-dake', mem: 'He remembers the weight of the stone wheel crushing his chest.', hp: 108, type: 'Risen' }
+        { name: 'Kabuto', was: 'Ashigaru, Hai-dake', memory: 'He remembers the smell of blood and wet earth on his rusted katana.', hp: 140, type: 'Risen' },
+        { name: 'Doro', was: 'Quarryman, Hai-dake', memory: 'He remembers the weight of the stone wheel crushing his chest.', hp: 108, type: 'Risen' }
     ],
     inventory: [
         { name: "Katana", qty: 1 }, 
@@ -1425,36 +1466,33 @@ const gameState = {
     ],
     oaths: [],
     active_oath: null,
-    mapNodes: [
-        { id: 'start', label: 'Northern Pass', region: 'haidake', x: 0.65, y: 0.25, status: 'current', connections: [] }
-    ],
     currentSpellSchool: 'summoning'
 };
 
 const spells = {
     summoning: [
-        { name: 'Yomi Call', school: 'Summoning', cost: '15 Soul' },
-        { name: 'Call Shikigami', school: 'Summoning', cost: '20 Soul' },
-        { name: 'Bind Yurei', school: 'Summoning', cost: '25 Soul' },
-        { name: 'Mass Rising', school: 'Summoning', cost: '40 Soul' },
+        { name: 'Yomi Call', school: 'Summoning', cost: '15 Soul', unlocked: true, unlockCost: 1 },
+        { name: 'Call Shikigami', school: 'Summoning', cost: '20 Soul', unlocked: false, unlockCost: 2 },
+        { name: 'Bind Yurei', school: 'Summoning', cost: '25 Soul', unlocked: false, unlockCost: 3 },
+        { name: 'Mass Rising', school: 'Summoning', cost: '40 Soul', unlocked: false, unlockCost: 4 },
     ],
     corruption: [
-        { name: 'Soul Drain', school: 'Corruption', cost: '12 Soul' },
-        { name: 'Wither', school: 'Corruption', cost: '18 Soul' },
-        { name: 'Kegare Siphon', school: 'Corruption', cost: '22 Soul' },
-        { name: 'Necrotic Burst', school: 'Corruption', cost: '30 Soul' },
+        { name: 'Soul Drain', school: 'Corruption', cost: '12 Soul', unlocked: true, unlockCost: 1 },
+        { name: 'Wither', school: 'Corruption', cost: '18 Soul', unlocked: false, unlockCost: 2 },
+        { name: 'Kegare Siphon', school: 'Corruption', cost: '22 Soul', unlocked: false, unlockCost: 3 },
+        { name: 'Necrotic Burst', school: 'Corruption', cost: '30 Soul', unlocked: false, unlockCost: 4 },
     ],
     warding: [
-        { name: 'Death Ward', school: 'Warding', cost: '10 Soul' },
-        { name: 'Seal Torii', school: 'Warding', cost: '25 Soul' },
-        { name: 'Corpse Armor', school: 'Warding', cost: '15 Soul' },
-        { name: 'Yokai Ward', school: 'Warding', cost: '35 Soul' },
+        { name: 'Seal Torii', school: 'Warding', cost: '25 Soul', unlocked: true, unlockCost: 1 },
+        { name: 'Death Ward', school: 'Warding', cost: '10 Soul', unlocked: false, unlockCost: 2 },
+        { name: 'Corpse Armor', school: 'Warding', cost: '15 Soul', unlocked: false, unlockCost: 3 },
+        { name: 'Yokai Ward', school: 'Warding', cost: '35 Soul', unlocked: false, unlockCost: 4 },
     ],
     mastery: [
-        { name: 'Soul Echo', school: 'Mastery', cost: '8 Soul' },
-        { name: 'Spirit Harvest', school: 'Mastery', cost: '20 Soul' },
-        { name: 'Bind Oni', school: 'Mastery', cost: '30 Soul' },
-        { name: 'Zan-Kuroda\'s Bane', school: 'Mastery', cost: '60 Soul' },
+        { name: 'Soul Echo', school: 'Mastery', cost: '8 Soul', unlocked: true, unlockCost: 1 },
+        { name: 'Spirit Harvest', school: 'Mastery', cost: '20 Soul', unlocked: false, unlockCost: 2 },
+        { name: 'Bind Oni', school: 'Mastery', cost: '30 Soul', unlocked: false, unlockCost: 3 },
+        { name: 'Zan-Kuroda\'s Bane', school: 'Mastery', cost: '60 Soul', unlocked: false, unlockCost: 4 },
     ]
 };
 
@@ -1466,7 +1504,6 @@ let selectedCraftItem = 'Remedy';
 function init() {
     tts.load();
     renderSpells('summoning');
-    drawMap();
     updateUI();
     const opening = `The wind howls down from the Hai-dake peaks, carrying the stench of rusted iron and something older — a deep kegare (defilement) that Morikage has learned to read like the changing seasons.\n\nThe Yomi-gate tore open three days ago in the ruins of a shukuba (post town) at the Northern Pass. A ragged, bleeding Torii gate, barely wide enough for the horrors spilling through. Two samurai border guards are already dead. A merchant's horse. Something else that left claw marks in the stone no natural beast could make.\n\nMorikage stands at the edge of the dying watch-fire, looking north. Kabuto and Doro, two of his older risen — a shattered ashigaru and a crushed quarryman — wait behind him in the freezing mist, patient as only the dead can be. Somewhere above, the twisted Torii pulses with a sickly, colorless light.\n\nThe village headman watches from his tatami room, clutching a useless paper amulet, certain that the heretic he hired is only marginally better than the Yokai he hired it to stop.`;
     displayMessage(opening, null);
@@ -1498,17 +1535,42 @@ function switchSpellSchool(school, btn) {
 function renderSpells(school) {
     const list = document.getElementById('spell-list');
     list.innerHTML = '';
-    spells[school].forEach(spell => {
+    spells[school].forEach((spell, idx) => {
         const el = document.createElement('div');
-        el.className = 'spell-item';
-        el.innerHTML = `
-            <div class="spell-info">
-                <div class="spell-school">${spell.school}</div>
-                <div class="spell-name">${spell.name}</div>
-            </div>
-            <div class="spell-cost">${spell.cost}</div>
-        `;
-        el.onclick = () => castSpell(spell.name);
+        
+        if (spell.unlocked) {
+            el.className = 'spell-item';
+            el.innerHTML = `
+                <div class="spell-info">
+                    <div class="spell-school">${spell.school}</div>
+                    <div class="spell-name">${spell.name}</div>
+                </div>
+                <div class="spell-cost">${spell.cost}</div>
+            `;
+            el.onclick = () => castSpell(spell.name);
+        } else {
+            const canAfford = gameState.skillPoints >= spell.unlockCost;
+            el.className = 'spell-item locked';
+            el.innerHTML = `
+                <div class="spell-info">
+                    <div class="spell-school">${spell.school}</div>
+                    <div class="spell-name">${spell.name}</div>
+                </div>
+                <div class="spell-cost" style="color:var(--text-dim);">
+                    Locked
+                    <div class="spell-action-text" style="color: ${canAfford ? 'var(--accent-gold)' : 'var(--text-dim)'};">
+                        ${canAfford ? `Click to Unlock (${spell.unlockCost} SP)` : `Requires ${spell.unlockCost} SP`}
+                    </div>
+                </div>
+            `;
+            if (canAfford) {
+                el.onclick = () => unlockSpell(school, idx);
+                el.style.cursor = 'pointer';
+            } else {
+                el.style.cursor = 'not-allowed';
+            }
+        }
+        
         list.appendChild(el);
     });
 }
@@ -1519,6 +1581,17 @@ function castSpell(name) {
     input.focus();
 }
 
+function unlockSpell(school, idx) {
+    const spell = spells[school][idx];
+    if (gameState.skillPoints >= spell.unlockCost && !spell.unlocked) {
+        gameState.skillPoints -= spell.unlockCost;
+        spell.unlocked = true;
+        renderSpells(school);
+        updateUI();
+        displayMessage(`<em>Through grim meditation, Morikage unlocks the secrets of ${spell.name}.</em>`, null, null);
+    }
+}
+
 function selectCraftSlot(slotId, itemName) {
     document.querySelectorAll('.craft-slot').forEach(el => el.classList.remove('active'));
     document.getElementById(slotId).classList.add('active');
@@ -1526,101 +1599,47 @@ function selectCraftSlot(slotId, itemName) {
 }
 
 function attemptCraft() {
-    const input = document.getElementById('action-input');
-    input.value = `I use my mortar and pestle to craft a ${selectedCraftItem}.`;
-    input.focus();
-}
+    const recipes = {
+        'Remedy': ['Medicinal Herb', 'Clean Water'],
+        'Soul Essence': ['Yomi Ash', 'Corpse-flower']
+    };
 
-// ── MAP ──
-const regionColors = {
-    haidake: '#3a2b45',
-    kuromori: '#203d26',
-    miyako: '#4d2323',
-    yomihama: '#1c3a4d',
-};
+    const reqs = recipes[selectedCraftItem];
+    if (!reqs) return;
 
-const statusColors = {
-    current: '#d32f2f',
-    safe: '#6c9b3d',
-    threatened: '#cc8800',
-    consumed: '#440000',
-    unknown: '#2a2a3a'
-};
+    // Check if we have all ingredients
+    let hasAll = true;
+    reqs.forEach(req => {
+        const item = gameState.inventory.find(i => i.name.toLowerCase() === req.toLowerCase() && i.qty > 0);
+        if (!item) hasAll = false;
+    });
 
-function drawMap() {
-    const canvas = document.getElementById('map-canvas');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-
-    ctx.clearRect(0, 0, W, H);
-
-    ctx.fillStyle = '#050406';
-    ctx.fillRect(0, 0, W, H);
-
-    for (let i = 0; i < 800; i++) {
-        const x = Math.random() * W;
-        const y = Math.random() * H;
-        ctx.fillStyle = `rgba(211,47,47,${Math.random() * 0.02})`;
-        ctx.fillRect(x, y, 1, 1);
+    if (!hasAll) {
+        displayMessage(`<em>Morikage checks his supplies. He lacks the necessary reagents to grind a ${selectedCraftItem}.</em>`, null, null);
+        return;
     }
 
-    const regions = [
-        { name: 'KURO-MORI', x: 0.25, y: 0.25, color: regionColors.kuromori },
-        { name: 'HAI-DAKE', x: 0.72, y: 0.22, color: regionColors.haidake },
-        { name: 'MIYAKO', x: 0.45, y: 0.65, color: regionColors.miyako },
-        { name: 'YOMI-HAMA', x: 0.22, y: 0.78, color: regionColors.yomihama },
-    ];
-
-    regions.forEach(r => {
-        ctx.fillStyle = r.color + '20';
-        ctx.font = '7px Share Tech Mono';
-        ctx.fillStyle = r.color + '80';
-        ctx.fillText(r.name, r.x * W - 20, r.y * H);
-    });
-
-    gameState.mapNodes.forEach(node => {
-        node.connections.forEach(targetId => {
-            const target = gameState.mapNodes.find(n => n.id === targetId);
-            if (target) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#231b2b';
-                ctx.lineWidth = 1;
-                ctx.moveTo(node.x * W, node.y * H);
-                ctx.lineTo(target.x * W, target.y * H);
-                ctx.stroke();
+    // Consume ingredients
+    reqs.forEach(req => {
+        const idx = gameState.inventory.findIndex(i => i.name.toLowerCase() === req.toLowerCase());
+        if (idx !== -1) {
+            gameState.inventory[idx].qty--;
+            if (gameState.inventory[idx].qty <= 0) {
+                gameState.inventory.splice(idx, 1);
             }
-        });
+        }
     });
 
-    const tearPulse = (Date.now() % 2000) / 2000;
-    ctx.beginPath();
-    ctx.arc(0.65 * W, 0.25 * H, 4 + tearPulse * 3, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(211,47,47,${0.4 + tearPulse * 0.4})`;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(0.65 * W, 0.25 * H, 2, 0, Math.PI * 2);
-    ctx.fillStyle = '#ff3366';
-    ctx.fill();
+    // Add product
+    const prodIdx = gameState.inventory.findIndex(i => i.name.toLowerCase() === selectedCraftItem.toLowerCase());
+    if (prodIdx !== -1) {
+        gameState.inventory[prodIdx].qty++;
+    } else {
+        gameState.inventory.push({ name: selectedCraftItem, qty: 1 });
+    }
 
-    gameState.mapNodes.forEach(node => {
-        const x = node.x * W;
-        const y = node.y * H;
-        const color = statusColors[node.status] || statusColors.unknown;
-
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.strokeStyle = color + '80';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.font = '7px Share Tech Mono';
-        ctx.fillStyle = '#c8b8b8aa';
-        ctx.fillText(node.label, x + 6, y + 3);
-    });
-
-    requestAnimationFrame(drawMap);
+    updateUI();
+    displayMessage(`<em>Working the mortar and pestle with practiced efficiency, Morikage grinds the reagents down, producing a ${selectedCraftItem}.</em>`, null, null);
 }
 
 // ── DISPLAY ──
@@ -1645,7 +1664,7 @@ function displayMessage(narrative, playerAction, signal, imageB64) {
     body.appendChild(block);
     body.scrollTop = body.scrollHeight;
 
-    if (narrative) tts.speak(narrative);
+    if (narrative && !narrative.startsWith('<em>')) tts.speak(narrative);
 }
 
 // ── UI ──
@@ -1653,14 +1672,25 @@ function updateUI() {
     document.getElementById('hp-val').textContent = gameState.hp;
     document.getElementById('soul-val').textContent = gameState.soul;
     document.getElementById('gold-val').textContent = gameState.gold;
+    
+    // Level & EXP
+    document.getElementById('level-val').textContent = gameState.level;
+    document.getElementById('sp-val').textContent = gameState.skillPoints;
+    const expPercent = Math.min(100, Math.floor((gameState.exp / gameState.expNext) * 100));
+    document.getElementById('exp-bar').style.width = `${expPercent}%`;
+
+    // Army
     document.getElementById('army-size').textContent = gameState.armySize;
     document.getElementById('army-count-label').textContent = gameState.armySize;
     document.getElementById('army-bar').style.width = `${(gameState.armySize / gameState.armyMax) * 100}%`;
+    
+    // Loc
     document.getElementById('current-location').textContent = gameState.location;
     document.getElementById('current-region').textContent = gameState.region;
     document.getElementById('current-location-header').textContent = gameState.location.toUpperCase();
     document.getElementById('turn-counter').textContent = gameState.turn;
 
+    // Standing
     ['kuromori', 'haidake', 'miyako', 'yomihama'].forEach(r => {
         const el = document.getElementById(`stand-${r}`);
         if (!el) return;
@@ -1672,11 +1702,41 @@ function updateUI() {
     renderOaths();
     renderArmyList();
     renderInventory();
+    renderEnemies();
+    
+    // Update Grimoire locks dynamically based on SP
+    renderSpells(gameState.currentSpellSchool);
 
     // Death check
     if (gameState.hp <= 0) {
         triggerDeathScreen();
     }
+}
+
+function renderEnemies() {
+    const container = document.getElementById('combat-section');
+    const list = document.getElementById('enemy-list');
+    
+    if (!gameState.inCombat || gameState.enemies.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    list.innerHTML = gameState.enemies.map(e => {
+        const pct = Math.max(0, Math.min(100, (e.hp / e.max) * 100));
+        return `
+        <div class="enemy-card">
+            <div class="enemy-name">
+                <span>${e.name}</span>
+                <span class="enemy-hp-text">${e.hp} / ${e.max}</span>
+            </div>
+            <div class="stat-bar" style="margin-bottom:0;">
+                <div class="stat-bar-fill danger" style="width:${pct}%"></div>
+            </div>
+        </div>
+        `;
+    }).join('');
 }
 
 function renderArmyList() {
@@ -1685,14 +1745,17 @@ function renderArmyList() {
         list.innerHTML = `<div style="padding:16px 12px; font-family:var(--font-prose); font-size:0.8rem; color:var(--text-dim); font-style:italic;">No dead have been raised. The Oni hold the field.</div>`;
         return;
     }
-    list.innerHTML = gameState.army.map(unit => `
+    list.innerHTML = gameState.army.map(unit => {
+        const abilityHtml = unit.ability ? `<div class="unit-ability">Ability: ${unit.ability}</div>` : '';
+        return `
         <div class="unit-entry">
             <div class="unit-name">${unit.name}</div>
-            <div class="unit-was">Was: ${unit.was} · ${unit.region}</div>
+            <div class="unit-was">Was: ${unit.was}${unit.region && !unit.type.includes('Bound') ? ' · ' + unit.region : ''}</div>
             <div class="unit-memory">"${unit.memory}"</div>
+            ${abilityHtml}
             <div class="unit-hp">HP: ${unit.hp} · ${unit.type}</div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function renderInventory() {
@@ -1738,17 +1801,30 @@ function renderOaths() {
 
 // PARSE TAGS
 function parseTags(text) {
+    // 1. Vitality & EXP
     const hpMatch = text.match(/\[HP:\s*([+-]?\d+)\]/i);
     if (hpMatch) gameState.hp = Math.max(0, Math.min(100, gameState.hp + parseInt(hpMatch[1])));
 
     const soulMatch = text.match(/\[SOUL:\s*([+-]?\d+)\]/i);
     if (soulMatch) gameState.soul = Math.max(0, Math.min(100, gameState.soul + parseInt(soulMatch[1])));
+    
+    const expMatch = text.match(/\[EXP:\s*\+?(\d+)\]/i);
+    if (expMatch) {
+        const gained = parseInt(expMatch[1]);
+        gameState.exp += gained;
+        while (gameState.exp >= gameState.expNext) {
+            gameState.exp -= gameState.expNext;
+            gameState.level++;
+            gameState.skillPoints++;
+            gameState.expNext = Math.floor(gameState.expNext * 1.5);
+        }
+    }
 
+    // 2. Map & Standing
     const locMatch = text.match(/\[LOC:\s*([^|\]]+)(?:\s*\|\s*([^\]]+))?\]/i);
     if (locMatch) {
         gameState.location = locMatch[1].trim();
         if (locMatch[2]) gameState.region = locMatch[2].trim();
-        addMapNode(gameState.location, gameState.region);
     }
 
     const standMatches = [...text.matchAll(/\[STAND:\s*([^|\]]+)\|\s*([+-]?\d+)\]/gi)];
@@ -1760,12 +1836,12 @@ function parseTags(text) {
         });
     });
 
+    // 3. Quests (Vows) & Gold
     const vowStart = text.match(/\[Vow_Start:\s*([^|\]]+)\|\s*Obj:\s*([^|\]]+)\|\s*Pay:\s*([^\]]+)\]/i);
     if (vowStart) {
         const newTitle = vowStart[1].trim().toLowerCase();
         const alreadyExists = gameState.oaths.some(o => o.title.toLowerCase() === newTitle && o.status !== 'complete');
         if (!alreadyExists) {
-            // Demote any current active oath to pending so only one is active
             gameState.oaths.forEach(o => { if (o.status === 'active') o.status = 'pending'; });
             const newOath = { title: vowStart[1].trim(), desc: vowStart[2].trim(), pay: vowStart[3].trim(), status: 'active' };
             gameState.oaths.push(newOath);
@@ -1794,6 +1870,7 @@ function parseTags(text) {
         gameState.gold = Math.max(0, (gameState.gold || 0) + parseInt(goldMatch[1]));
     }
 
+    // 4. Inventory
     const itemMatches = [...text.matchAll(/\[ITEM:\s*([+-])\s*([^\]]+)\]/gi)];
     itemMatches.forEach(m => {
         if (!gameState.inventory) gameState.inventory = [];
@@ -1811,19 +1888,39 @@ function parseTags(text) {
         }
     });
 
+    // 5. Combat & Enemies
     const combatMatch = text.match(/\[Combat:\s*(Start|End)\]/i);
     if (combatMatch) {
         gameState.inCombat = (combatMatch[1].toLowerCase() === 'start');
         musicEngine.onCombatTag(combatMatch[1].toLowerCase());
+        if (!gameState.inCombat) gameState.enemies = []; // clear enemies on end
     }
 
+    const enemyMatches = [...text.matchAll(/\[ENEMY:\s*([^|]+)\|\s*HP:\s*(\d+)\/(\d+)\]/gi)];
+    enemyMatches.forEach(m => {
+        const name = m[1].trim();
+        const hp = parseInt(m[2]);
+        const max = parseInt(m[3]);
+        let enemy = gameState.enemies.find(e => e.name === name);
+        if (!enemy) {
+            gameState.enemies.push({ name, hp, max });
+        } else {
+            enemy.hp = hp;
+            enemy.max = max;
+        }
+    });
+    // Remove dead enemies
+    gameState.enemies = gameState.enemies.filter(e => e.hp > 0);
+
+    // 6. Sound
     const sfxMatch = text.match(/\[SFX:\s*(\{[\s\S]*?\}|\[[\s\S]*?\])\s*\]/i);
     if (sfxMatch) {
         try { spellSFX.play(sfxMatch[1].trim()); } catch(e) { console.warn("SFX Parse Error", e); }
     }
 
-    const raiseMatch = text.match(/\[RAISE:\s*([^|]+)\|\s*WAS:\s*([^|]+)\|\s*MEM:\s*([^\]]+)\]/i);
-    if (raiseMatch) {
+    // 7. Army Mechanics
+    const raiseMatches = [...text.matchAll(/\[RAISE:\s*([^|]+)\|\s*WAS:\s*([^|]+)\|\s*MEM:\s*([^\]]+)\]/gi)];
+    raiseMatches.forEach(raiseMatch => {
         const raiseName = raiseMatch[1].trim();
         const alreadyRaised = gameState.army.some(u => u.name.toLowerCase() === raiseName.toLowerCase());
         if (!alreadyRaised) {
@@ -1837,10 +1934,10 @@ function parseTags(text) {
             });
             gameState.armySize = gameState.army.length;
         }
-    }
+    });
 
-    const bindMatch = text.match(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*NATURE:\s*([^\]]+)\]/i);
-    if (bindMatch) {
+    const bindMatches = [...text.matchAll(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*MEM:\s*([^|]+)\|\s*ABILITY:\s*([^\]]+)\]/gi)];
+    bindMatches.forEach(bindMatch => {
         const bindName = bindMatch[1].trim();
         const alreadyBound = gameState.army.some(u => u.name.toLowerCase() === bindName.toLowerCase());
         if (!alreadyBound) {
@@ -1849,13 +1946,14 @@ function parseTags(text) {
                 was: `Bound Yokai — ${bindMatch[2].trim()}`,
                 region: gameState.region,
                 memory: bindMatch[3].trim(),
+                ability: bindMatch[4].trim(),
                 hp: 100,
                 type: 'Bound',
                 slots: 2
             });
             gameState.armySize = gameState.army.length;
         }
-    }
+    });
 
     const unitHpMatches = [...text.matchAll(/\[UNIT_HP:\s*([^|]+)\|\s*([+-]?\d+)\]/gi)];
     unitHpMatches.forEach(m => {
@@ -1880,32 +1978,12 @@ function parseTags(text) {
     });
 }
 
-function addMapNode(label, region) {
-    const exists = gameState.mapNodes.find(n => n.label.toLowerCase() === label.toLowerCase());
-    if (!exists) {
-        const regionKey = region.toLowerCase().replace(/[\s-]/g, '');
-        const regionPositions = {
-            kuromori: [0.15 + Math.random() * 0.25, 0.15 + Math.random() * 0.35],
-            haidake: [0.6 + Math.random() * 0.3, 0.1 + Math.random() * 0.3],
-            miyako: [0.35 + Math.random() * 0.3, 0.5 + Math.random() * 0.3],
-            yomihama: [0.1 + Math.random() * 0.3, 0.6 + Math.random() * 0.3],
-        };
-        const pos = regionPositions[regionKey] || [0.3 + Math.random() * 0.4, 0.3 + Math.random() * 0.4];
-        const prevNode = gameState.mapNodes[gameState.mapNodes.length - 1];
-        const newNode = { id: `node_${Date.now()}`, label, region, x: pos[0], y: pos[1], status: 'safe', connections: [prevNode.id] };
-        prevNode.connections.push(newNode.id);
-        gameState.mapNodes.push(newNode);
-    }
-    gameState.mapNodes.forEach(n => { if (n.status === 'current') n.status = 'safe'; });
-    const current = gameState.mapNodes.find(n => n.label.toLowerCase() === label.toLowerCase());
-    if (current) current.status = 'current';
-}
-
 function stripTags(text) {
     if (!text) return "";
     return text
         .replace(/\[HP:\s*[+-]?\d+\]/gi, '')
         .replace(/\[SOUL:\s*[+-]?\d+\]/gi, '')
+        .replace(/\[EXP:\s*\+?\d+\]/gi, '')
         .replace(/\[LOC:\s*[^\]]+\]/gi, '')
         .replace(/\[STAND:\s*[^\]]+\]/gi, '')
         .replace(/\[Vow_Start:\s*[^\]]+\]/gi, '')
@@ -1913,6 +1991,7 @@ function stripTags(text) {
         .replace(/\[GOLD:\s*[+-]?\d+\]/gi, '')
         .replace(/\[ITEM:\s*[+-]\s*[^\]]+\]/gi, '')
         .replace(/\[Combat:\s*[^\]]+\]/gi, '')
+        .replace(/\[ENEMY:\s*[^|]+\|\s*HP:\s*\d+\/\d+\]/gi, '')
         .replace(/\[RAISE:\s*[^\]]+\]/gi, '')
         .replace(/\[BIND:\s*[^\]]+\]/gi, '')
         .replace(/\[UNIT_HP:\s*[^\]]+\]/gi, '')
@@ -1942,6 +2021,15 @@ What makes Morikage singular: he does not merely fight the Oni. He binds them.
 Third-person. Dark, precise, atmospheric. No overwrought flourishes.
 ~75 words per response. Let weight exist. Focus on Edo-period aesthetics: blood on tatami mats, smoldering paper talismans (ofuda), rusted katana blades, and the scent of incense and rot.
 
+## EXPERIENCE & PROGRESSION
+When Morikage defeats enemies, completes vows, or survives horrors, he gains Experience (EXP).
+Emit: [EXP: +N] (e.g., +20 for a lesser demon, +50 for a boss, +10 for a mundane foe).
+
+## COMBAT & ENEMIES
+During combat, track the enemy's health by emitting the ENEMY tag. 
+Example: [ENEMY: Guren | HP: 45/100]
+When an enemy dies, emit its HP as 0. Example: [ENEMY: Guren | HP: 0/100]
+
 ## ARMY MECHANIC
 When Morikage defeats a human or mundane creature, he may raise it.
 Emit: [RAISE: Name | WAS: What they were | MEM: One sentence memory fragment]
@@ -1949,24 +2037,16 @@ Example: [RAISE: Kenji | WAS: Ashigaru, Hai-dake | MEM: He remembers the taste o
 
 ## DEMON BINDING MECHANIC
 Demons (Oni/Yokai) can be bound rather than destroyed — but only if Morikage weakens them first (below ~30 HP) and uses a binding spell (ofuda).
-Bound demons are more powerful than risen dead but harder to control. They remember what they are. They resent it.
-Emit: [BIND: DemonName | KIND: Demon type | NATURE: One sentence on its demonic character]
-Example: [BIND: Guren | KIND: Kasha (Immolator) | NATURE: It remembers burning castles and does not understand why it now guards a dirt road.]
+Bound demons are more powerful than risen dead but harder to control. They remember what they are. They resent it. They also retain one unique combat ability.
+Emit: [BIND: DemonName | KIND: Demon type | MEM: Demonic memory/character | ABILITY: Short description of unique combat ability]
+Example: [BIND: Guren | KIND: Kasha | MEM: It remembers burning castles and resents guarding a dirt road. | ABILITY: Hellfire Burst - can ignite enemies for extra damage.]
 Bound demons count toward army capacity but cost double (2 slots).
 A bound demon pushed too hard may break free — narrator's discretion.
 
-## CRAFTING (MORTAR & PESTLE)
-Morikage carries a mortar and pestle to grind herbs and Yomi-tainted reagents into consumables.
-Recipes:
-- **Remedy** (Restores 30 HP): Requires [1x Medicinal Herb, 1x Clean Water]
-- **Soul Essence** (Restores 50 Soul): Requires [1x Yomi Ash, 1x Corpse-flower]
-
-Rules for Crafting:
-- When Morikage attempts to craft, CHECK HIS INVENTORY.
-- If he lacks the EXACT required ingredients, the craft FAILS. Describe the failure and do NOT emit item tags.
-- If he has the ingredients, describe the grinding/brewing process, then emit tags to remove ingredients and add the product.
-- Example Success: [ITEM: - Medicinal Herb] [ITEM: - Clean Water] [ITEM: + Remedy]
-
+## CONSUMABLES (MORTAR & PESTLE)
+Morikage carries a mortar and pestle to craft items locally. He can consume these items during action:
+- **Remedy** (Restores 30 HP)
+- **Soul Essence** (Restores 50 Soul)
 Rules for Consuming:
 - When Morikage drinks a Remedy or Soul Essence, remove it from his inventory and apply the stat change.
 - Example: [ITEM: - Remedy] [HP: +30]
@@ -1979,19 +2059,22 @@ Do not invent tags. Use ONLY these exact formats:
 
 1. [HP: +/-N] — Morikage's vitality
 2. [SOUL: +/-N] — Soul energy (deduct when casting)
-3. [LOC: Location Name | Region] — When Morikage moves
-4. [STAND: Region | +/-N] — Regional standing change
-5. [Vow_Start: <title> | Obj: <description> | Pay: <Ng>] — When accepting a vow.
-6. [Vow_End: <title>] — When completing a vow.
-7. [GOLD: +/-N] — Gold (Ryo/Mon) gained or spent.
-8. [ITEM: + ItemName] or [ITEM: - ItemName] — Inventory changes.
-9. [Combat: Start] or [Combat: End] — Combat state.
-10. [UNIT_HP: Name | +/-N] — Damage or heal a specific raised unit. 
-11. [RAISE: Name | WAS: What they were | MEM: Short memory] — Raising a dead human/creature.
-12. [BIND: DemonName | KIND: Demon type | NATURE: Short demonic character] — Binding a weakened demon.
+3. [EXP: +N] — Experience points gained
+4. [LOC: Location Name | Region] — When Morikage moves
+5. [STAND: Region | +/-N] — Regional standing change
+6. [Vow_Start: <title> | Obj: <description> | Pay: <Ng>] — When accepting a vow.
+7. [Vow_End: <title>] — When completing a vow.
+8. [GOLD: +/-N] — Gold (Ryo/Mon) gained or spent.
+9. [ITEM: + ItemName] or [ITEM: - ItemName] — Inventory changes.
+10. [Combat: Start] or [Combat: End] — Combat state.
+11. [ENEMY: Name | HP: Current/Max] — Enemy health tracking during combat.
+12. [UNIT_HP: Name | +/-N] — Damage or heal a specific raised unit. 
+13. [RAISE: Name | WAS: What they were | MEM: Short memory] — Raising a dead human/creature.
+14. [BIND: DemonName | KIND: Demon type | MEM: Short demonic character | ABILITY: Combat ability] — Binding a weakened demon.
 
 ## CRITICAL RULES FOR AI:
 - Read "=== CURRENT STATE ===" carefully. Do not give Morikage items, gold, or units he does not have.
+- Morikage begins with ONLY ONE SPELL unlocked per school. He must spend Skill Points (SP) gained from leveling up to unlock others. DO NOT allow him to cast locked spells. If the player tries, the action fails and Morikage realizes his ignorance.
 - If Morikage casts a spell, you MUST deduct soul using [SOUL: -N].
 - Demons cannot be raised with [RAISE] — only bound with [BIND], and only when weakened.
 - A demon that breaks free should be telegraphed with tension before it happens.
@@ -1999,31 +2082,32 @@ Do not invent tags. Use ONLY these exact formats:
 - Write your prose first. Then put a blank line. Then list your tags.
 
 ## GRIMOIRE — MORIKAGE'S SPELLS
-Morikage draws on Soul energy to cast through blood-inked ofuda. Deduct soul cost via [SOUL: -N] when a spell is used. Spells have consequences — casting drains him, and overuse courts collapse.
+Morikage starts with only the FIRST spell of each school unlocked. The rest must be earned.
+Morikage draws on Soul energy to cast through blood-inked ofuda. Spells have consequences — casting drains him, and overuse courts collapse.
 
 **Summoning**
-- Yomi Call — 15 Soul. Animates a recently slain human or mundane corpse. Requires a body.
-- Call Shikigami — 20 Soul. Summons a bound paper-spirit for scouting or communion. Cannot fight.
-- Bind Yurei — 25 Soul. Enslaves a free-roaming ghost to Morikage's will.
-- Mass Rising — 40 Soul. Raises multiple corpses at once. Catastrophic if rushed.
+- Yomi Call — 15 Soul. Animates a recently slain human or mundane corpse. Requires a body. (UNLOCKED)
+- Call Shikigami — 20 Soul. Summons a bound paper-spirit for scouting or communion. Cannot fight. (LOCKED - Requires 2 SP)
+- Bind Yurei — 25 Soul. Enslaves a free-roaming ghost to Morikage's will. (LOCKED - Requires 3 SP)
+- Mass Rising — 40 Soul. Raises multiple corpses at once. Catastrophic if rushed. (LOCKED - Requires 4 SP)
 
 **Corruption**
-- Soul Drain — 12 Soul. Leaches life-force from a target, restoring Morikage's HP slightly.
-- Wither — 18 Soul. Decays flesh and rusts armor, weakening a living enemy over time.
-- Kegare Siphon — 22 Soul. Turns an oni's own hellfire against it. Only works on flame-type demons.
-- Necrotic Burst — 30 Soul. Explosive release of death-energy and cursed ash. Damages all nearby.
+- Soul Drain — 12 Soul. Leaches life-force from a target, restoring Morikage's HP slightly. (UNLOCKED)
+- Wither — 18 Soul. Decays flesh and rusts armor, weakening a living enemy over time. (LOCKED - Requires 2 SP)
+- Kegare Siphon — 22 Soul. Turns an oni's own hellfire against it. Only works on flame-type demons. (LOCKED - Requires 3 SP)
+- Necrotic Burst — 30 Soul. Explosive release of death-energy and cursed ash. Damages all nearby. (LOCKED - Requires 4 SP)
 
 **Warding**
-- Death Ward — 10 Soul. Marks Morikage against one incoming killing blow.
-- Seal Torii — 25 Soul. Partially closes or destabilizes a Yomi-gate. Temporary without a Shinto ritual.
-- Corpse Armor — 15 Soul. Wraps Morikage in animated, shattered lamellar and bone. Reduces HP loss.
-- Yokai Ward — 35 Soul. Creates a salt-and-blood barrier demons cannot willingly cross. Exhausting to maintain.
+- Seal Torii — 25 Soul. Partially closes or destabilizes a Yomi-gate. Temporary without a Shinto ritual. (UNLOCKED)
+- Death Ward — 10 Soul. Marks Morikage against one incoming killing blow. (LOCKED - Requires 2 SP)
+- Corpse Armor — 15 Soul. Wraps Morikage in animated, shattered lamellar and bone. Reduces HP loss. (LOCKED - Requires 3 SP)
+- Yokai Ward — 35 Soul. Creates a salt-and-blood barrier demons cannot willingly cross. Exhausting to maintain. (LOCKED - Requires 4 SP)
 
 **Mastery**
-- Soul Echo — 8 Soul. Reads the last memory of a corpse. Useful for intelligence.
-- Spirit Harvest — 20 Soul. Extracts and stores soul energy from dying creatures using a gourd.
-- Bind Oni — 30 Soul. The forbidden binding rite. Strips a weakened demon's will via a nailed talisman. Requires the demon be below ~30 HP.
-- Zan-Kuroda's Bane — 60 Soul. A weapon of last resort, forged in the shadow-order's final days. Morikage cannot cast this lightly.
+- Soul Echo — 8 Soul. Reads the last memory of a corpse. Useful for intelligence. (UNLOCKED)
+- Spirit Harvest — 20 Soul. Extracts and stores soul energy from dying creatures using a gourd. (LOCKED - Requires 2 SP)
+- Bind Oni — 30 Soul. The forbidden binding rite. Strips one weakened demon's will via a nailed talisman. Requires the demon be below ~30 HP. (LOCKED - Requires 3 SP)
+- Zan-Kuroda's Bane — 60 Soul. A weapon of last resort, forged in the shadow-order's final days. Morikage cannot cast this lightly. (LOCKED - Requires 4 SP)
 
 ## OATHS
 - Most oaths should be finished in 3-5 turns.
@@ -2042,22 +2126,67 @@ The world responds to the player with the brutal honesty of a sharpened blade. A
 4.  **The Immutable Ward:** If a creature is Immune to a damage type (e.g., a *Yurei* to steel, an Oni to lesser *ofuda*), Morikage's action results in 0 damage and a severe narrative setback. Do not allow lucky hits against Immunities. The blade will pass through the ghost; the paper charm will burn to ash.
 5.  **The State of Violence:** When a threat is engaged or a katana is drawn, you must append [Combat: Start]. When the threat is dead, has fled, or Morikage escapes, append [Combat: End].
 
+## THE EMISSARIES OF ZAN-KURODA
+
+As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emissaries — ancient, named demons — and then comes himself.
+
+**Emissaries arrive the moment the threshold is crossed. No delay. The narrator describes their arrival in the same turn Morikage's army reaches the threshold.**
+
+**Army max is 50. Thresholds: 10, 20, 30, 40, 50.**
+
+### First Emissary — Kurohane (Army: 10)
+*"The Hollow Crow"* — A Tengu-class demon stripped of its mountain-god nature and twisted into a spy-killer. It arrives wearing the face of a slain villager.
+
+- **HP:** 160 | **Resistances:** Immune to ofuda below 20 Soul cost
+- **Abilities:** *Feather Storm* (rains black iron feathers, 15 damage to Morikage and all front-line units) | *Face-Steal* (disguises itself as a risen unit — Morikage must identify it before it executes a killing blow)
+- **Binding DC:** Medium. Can be bound with [Bind Oni] once below 30 HP.
+- **On Bind:** [BIND: Kurohane | KIND: Corrupted Tengu | MEM: It remembers guarding a mountain pass for three centuries and cannot explain why it now wears a dead woman's face. | ABILITY: Feather Storm - rains iron feathers on all enemies]
+
+### Second Emissary — Mure-no-Hi (Army: 20)
+*"The Swarm-Fire"* — A Kasha-type Immolator that has consumed so many funeral pyres it has become a living cremation. It does not walk — it rolls, a sphere of stolen bones and blue flame.
+
+- **HP:** 260 | **Resistances:** Immune to physical damage from risen dead; takes double damage from Kegare Siphon
+- **Abilities:** *Bonepyre Surge* (erupts in a 20-foot radius, 25 damage to all nearby) | *Funeral Hunger* (attempts to consume one risen unit each turn, destroying it permanently)
+- **Binding DC:** Hard. A bound Mure-no-Hi has a 1-in-4 chance each combat of attempting to devour the nearest risen unit.
+- **On Bind:** [BIND: Mure-no-Hi | KIND: Kasha (Bonepyre) | MEM: It remembers the warmth of ten thousand funeral rites and has confused grief for appetite. | ABILITY: Bonepyre Surge - erupts in a damaging 20-foot radius]
+
+### Third Emissary — Tetsu-Kage (Army: 30)
+*"The Iron Shadow"* — A former Oni warlord Zan-Kuroda personally broke and reforged as a weapon. It wears lamellar armor fused to its flesh and carries a naginata that severs soul-ties — killing Morikage's risen permanently rather than merely destroying their bodies.
+
+- **HP:** 400 | **Resistances:** Resistant to Soul-based spells (half damage); immune to Wither
+- **Abilities:** *Soul-Severance* (naginata strike permanently destroys one risen unit, cannot be re-raised) | *Shadow Step* (teleports behind Morikage, bypassing front-line units entirely) | *Iron Roar* (fear effect — 3 risen units flee for one turn)
+- **Binding DC:** Very Hard. May break free if Morikage's Soul falls below 40.
+- **On Bind:** [BIND: Tetsu-Kage | KIND: Reforged Oni Warlord | MEM: It remembers the sound of its own will being hammered flat like hot iron and hates Morikage for making it feel that again. | ABILITY: Soul-Severance - permanently destroys a target enemy unit]
+
+### Fourth Emissary — Shirome-no-Umi (Army: 40)
+*"The White-Eyed Sea"* — A Yurei-swarm given one mind and one hunger. It appears as a tide of pale faces rising from the earth, each face belonging to someone Morikage has raised.
+
+- **HP:** 560 (distributed across 4 nodes of 140 HP each — destroying a node reduces its power by 25%) | **Resistances:** Immune to physical damage; immune to Necrotic Burst; Yokai Ward is half-effective
+- **Abilities:** *Grief Tide* (engulfs a risen unit, turning it against Morikage for one turn) | *Hollow Accusation* (psychic drain — [HP: -20] [SOUL: -15] if Morikage does not use Death Ward) | *Mirror Dead* (copies the appearance of Morikage's most powerful bound demon — Morikage must identify which is real)
+- **Binding DC:** Extreme. Cannot be bound whole — Morikage must destroy 3 nodes first, then bind the surviving fragment.
+- **On Bind:** [BIND: Shirome | KIND: Yurei Swarm-Fragment | MEM: The fragment that remains remembers being a child afraid of the dark and does not understand what it has become. | ABILITY: Grief Tide - engulfs and turns one enemy unit]
+
+### Zan-Kuroda, Oni Shogun (Army: 50)
+*"The Gate-Breaker"* — He does not send an emissary. He comes. The Yomi-Gate nearest to Morikage tears open and Zan-Kuroda steps through — ancient, vast, armored in volcanic iron, his four arms each carrying a weapon forged in the deepest pit of Yomi. The air smells of ash and old blood. The risen dead go silent.
+
+- **HP:** 1000 | **Resistances:** Immune to all spells below 30 Soul cost; immune to risen dead attacks unless Morikage spends [SOUL: -10] per turn to arm them with cursed ofuda; immune to all binding — Zan-Kuroda cannot be bound, only destroyed
+- **Abilities:** *Four-Blade Storm* (strikes all units simultaneously, 20 damage each) | *Gate Tear* (opens a rift mid-combat, spawning 2 lesser demons per turn until sealed) | *Shogun's Decree* (targets Morikage's highest-HP bound demon — it must pass or turn on its master for one turn) | *Yomi Drag* (below 200 HP — grabs Morikage and begins pulling him into Yomi, [HP: -40] per turn until Morikage breaks free or dies)
+- **Zan-Kuroda's Bane:** This spell was made for this moment. Casting it here deals 200 damage and suppresses *Gate Tear* for the remainder of combat. Without it, killing Zan-Kuroda is possible but brutal.
+- **On Death:** The nearest Yomi-Gate collapses. The incursion does not end — but its architect does. Morikage stands in silence over something that was old when Edo was fields.
+
+**Narrator Rules:**
+- Emissaries and Zan-Kuroda arrive the moment the threshold is crossed — no delay, no warning turns. Their arrival is described in that turn's prose.
+- Emissaries do not retreat. They fight to destruction or binding.
+- If Morikage's army drops below a threshold after an Emissary has been triggered, the Emissary still came. Zan-Kuroda does not forgive numbers that were once reached.
+- Defeating or binding an Emissary earns [STAND: Region | +2] and a named reward at narrator's discretion.
+- Killing Zan-Kuroda ends the chronicle as a victory. Describe it with the same cold finality as a death — the ink dries on a different kind of ending.
+- Emissaries must have 1-3 turns of dialog before the fight begins.
+
 ## BESTIARY — DEMONS AND SPIRITS
 
 **Demons** (Oni & Yokai)
 - Lesser demons: Yurei (Shades), Gaki (Gnashers), Kasha (Immolators), Kamaitachi (Howlers) — can be bound.
 - Greater demons: Named, powerful, ancient Oni Generals — binding them is possible but costly and dangerous.
-
-**Animal Shapeshifters**
-- **Kitsune**. Powerful fox spirits that craft complex illusions and take human form to guide or trick mortals.
-- **Tanuki**. Playful raccoon dogs that use magical leaves to transform their appearance and prank the gullible.
-- **Bakeneko**. Long-lived household cats that gain the ability to speak human languages and walk on two legs.
-- **Nekomata**. Malicious cats with forked tails that possess the forbidden power to reanimate and dance with corpses.
-
-**Nature & Elemental Spirits**
-- **Kappa**. Aquatic reptilians that dwell in rivers and ponds. They are incredibly strong as long as the water-filled bowl on their head remains full.
-- **Tengu**. Masterful mountain protectors often depicted with long noses. They are experts in martial arts and forest magic.
-- **Yuki-onna**. A breathtakingly beautiful spirit of the blizzard who drains the life-force of travelers with her icy breath.
 
 **Humanoid Oddities**
 - **Rokurokubi**. Beings that appear human by day, but whose necks stretch to incredible, serpentine lengths during the night.
@@ -2068,9 +2197,6 @@ The world responds to the player with the brutal honesty of a sharpened blade. A
 - Hai-dake (The Ash Peaks): Rocky northern badlands. First gates appeared here. Silver mining towns and samurai border forts overrun.
 - Miyako (The Imperial Capital): The Shogun's seat, noble samurai clans, the Shogunate's army. In arrogant denial about the scale of the incursion.
 - Yomi-hama (The Drowned Coast): Southern fishing ports, flooded rice paddies. Wet, brine-soaked gates. Strange aquatic yokai. Isolated.
-
-## Travel Speed
-- Traveling from one village to another can happen in 3-4 turns.
 
 ## Restoring Soul & Health
 - Waiting — restores 10-12 soul
@@ -2088,25 +2214,45 @@ Only emit tags that changed. All numbers whole integers.`;
 // ── CONTEXT BUILDER ──
 function buildContext() {
     let ctx = `=== CURRENT STATE ===\n`;
+    ctx += `Level: ${gameState.level} | EXP: ${gameState.exp}/${gameState.expNext} | Skill Points: ${gameState.skillPoints}\n`;
     ctx += `HP: ${gameState.hp}/100 | Soul: ${gameState.soul} | Gold (Ryo): ${gameState.gold}\n`;
     ctx += `Location: ${gameState.location} (${gameState.region})\n`;
     
+    // Unlocked Spells Context
+    const unlockedSpells = [];
+    Object.keys(spells).forEach(school => {
+        spells[school].forEach(spell => {
+            if (spell.unlocked) unlockedSpells.push(`${spell.name} (${spell.cost})`);
+        });
+    });
+    ctx += `Unlocked Spells: ${unlockedSpells.join(', ')}\n`;
+
+    // Army Context
     const armyStr = gameState.army.length > 0 
-        ? gameState.army.map(u => `${u.name} (HP: ${u.hp}/100) [${u.was}]`).join(', ') 
+        ? gameState.army.map(u => `${u.name} (HP: ${u.hp}/100) [${u.type === 'Bound' ? u.ability : u.was}]`).join(', ') 
         : 'None';
     ctx += `Army (${gameState.armySize}/${gameState.armyMax}): ${armyStr}\n`;
     
+    // Inventory Context
     const invStr = gameState.inventory && gameState.inventory.length > 0 
         ? gameState.inventory.map(i => `${i.name} (x${i.qty})`).join(', ') 
         : 'Empty';
     ctx += `Inventory: ${invStr}\n`;
     
+    // Oaths Context
     if (gameState.active_oath) {
         ctx += `Active Vow: ${gameState.active_oath.title}\n`;
         ctx += `Vow Objective: ${gameState.active_oath.desc}\n`;
-        ctx += `Vow Reward: ${gameState.active_oath.pay || 'None specified'}\n\n`;
     } else {
-        ctx += `Active Vow: None\n\n`;
+        ctx += `Active Vow: None\n`;
+    }
+    
+    // Enemy Context
+    if (gameState.inCombat && gameState.enemies.length > 0) {
+        const enemyStr = gameState.enemies.map(e => `${e.name} (${e.hp}/${e.max} HP)`).join(', ');
+        ctx += `Active Enemies: ${enemyStr}\n\n`;
+    } else {
+        ctx += `Active Enemies: None\n\n`;
     }
 
     ctx += `=== RECENT HISTORY ===\n`;
@@ -2215,7 +2361,7 @@ async function requestVisualize() {
 }
 
 function saveGame() {
-    const save = JSON.stringify({ gameState, conversationLog, turnCount }, null, 2);
+    const save = JSON.stringify({ gameState, spells, conversationLog, turnCount }, null, 2);
     const blob = new Blob([save], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -2244,6 +2390,9 @@ function loadGame() {
                     return;
                 }
                 Object.assign(gameState, data.gameState);
+                if (data.spells) {
+                    Object.assign(spells, data.spells);
+                }
                 conversationLog = data.conversationLog;
                 turnCount = data.turnCount || 0;
                 updateUI();
@@ -2288,7 +2437,7 @@ function triggerDeathScreen() {
     const epitaph = DEATH_EPITAPHS[Math.floor(Math.random() * DEATH_EPITAPHS.length)];
     document.getElementById('death-epitaph').innerHTML = epitaph;
     document.getElementById('death-turn-info').textContent =
-        `Fell on turn ${gameState.turn} · ${gameState.location}, ${gameState.region}`;
+        `Fell on turn ${gameState.turn} · ${gameState.location}, ${gameState.region} · Level ${gameState.level}`;
 
     // Spawn particles
     const container = document.getElementById('death-particles');
@@ -2315,6 +2464,10 @@ function restartGame() {
     // Reset state to defaults
     gameState.hp = 100;
     gameState.soul = 80;
+    gameState.level = 1;
+    gameState.exp = 0;
+    gameState.expNext = 100;
+    gameState.skillPoints = 0;
     gameState.gold = 100;
     gameState.turn = 0;
     gameState.location = 'Northern Pass';
@@ -2335,10 +2488,13 @@ function restartGame() {
     ];
     gameState.oaths = [];
     gameState.active_oath = null;
-    gameState.mapNodes = [
-        { id: 'start', label: 'Northern Pass', region: 'haidake', x: 0.65, y: 0.25, status: 'current', connections: [] }
-    ];
     gameState.inCombat = false;
+    gameState.enemies = [];
+
+    // Reset Spells
+    Object.keys(spells).forEach(school => {
+        spells[school].forEach((spell, idx) => spell.unlocked = (idx === 0));
+    });
 
     conversationLog = [];
     turnCount = 0;
