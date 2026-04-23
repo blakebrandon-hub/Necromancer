@@ -304,6 +304,14 @@ header {
     margin-top: 4px;
 }
 
+.unit-soul {
+    font-family: var(--font-ui);
+    font-size: 0.5rem;
+    color: var(--accent-soul);
+    margin-top: 2px;
+    letter-spacing: 1px;
+}
+
 /* CRAFTING SECTION */
 .craft-section {
     border-top: 1px solid var(--border);
@@ -1866,13 +1874,21 @@ function renderArmyList() {
         return;
     }
     list.innerHTML = gameState.army.map(unit => {
-        const abilityHtml = unit.ability ? `<div class="unit-ability">Ability: ${unit.ability}</div>` : '';
+        const isBound = unit.type === 'Bound';
+        const soulLocked = isBound && unit.soul === 0;
+        const abilityHtml = unit.ability
+            ? `<div class="unit-ability" style="${soulLocked ? 'opacity:0.4;' : ''}">${soulLocked ? '🔒 ' : ''}Ability: ${unit.ability}</div>`
+            : '';
+        const soulHtml = isBound
+            ? `<div class="unit-soul">Soul: ${unit.soul}/${unit.soulMax}${soulLocked ? ' · <span style="color:var(--accent-soul-dim)">LOCKED</span>' : ''}</div>`
+            : '';
         return `
         <div class="unit-entry">
             <div class="unit-name">${unit.name}</div>
             <div class="unit-was">Was: ${unit.was}${unit.region && !unit.type.includes('Bound') ? ' · ' + unit.region : ''}</div>
             <div class="unit-memory">"${unit.memory}"</div>
             ${abilityHtml}
+            ${soulHtml}
             <div class="unit-hp">HP: ${unit.hp} · ${unit.type}</div>
         </div>
     `}).join('');
@@ -2052,11 +2068,12 @@ function parseTags(text) {
         }
     });
 
-    const bindMatches = [...text.matchAll(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*MEM:\s*([^|]+)\|\s*ABILITY:\s*([^\]]+)\]/gi)];
+    const bindMatches = [...text.matchAll(/\[BIND:\s*([^|]+)\|\s*KIND:\s*([^|]+)\|\s*MEM:\s*([^|]+)\|\s*ABILITY:\s*([^|\]]+)(?:\|\s*SOUL:\s*(\d+))?\]/gi)];
     bindMatches.forEach(bindMatch => {
         const bindName = bindMatch[1].trim();
         const alreadyBound = gameState.army.some(u => u.name.toLowerCase() === bindName.toLowerCase());
         if (!alreadyBound) {
+            const soulMax = bindMatch[5] ? parseInt(bindMatch[5]) : 4;
             gameState.army.push({
                 name: bindName,
                 was: `Bound Yokai — ${bindMatch[2].trim()}`,
@@ -2064,10 +2081,23 @@ function parseTags(text) {
                 memory: bindMatch[3].trim(),
                 ability: bindMatch[4].trim(),
                 hp: 100,
+                soul: soulMax,
+                soulMax: soulMax,
                 type: 'Bound',
                 slots: 2
             });
             gameState.armySize = gameState.army.length;
+        }
+    });
+
+    // DEMON_SOUL tag — ability charge drain/restore
+    const demonSoulMatches = [...text.matchAll(/\[DEMON_SOUL:\s*([^|]+)\|\s*([+-]?\d+)\]/gi)];
+    demonSoulMatches.forEach(m => {
+        const unitName = m[1].trim().toLowerCase();
+        const change = parseInt(m[2]);
+        const unit = gameState.army.find(u => u.type === 'Bound' && (u.name.toLowerCase() === unitName || u.name.toLowerCase().includes(unitName)));
+        if (unit) {
+            unit.soul = Math.max(0, Math.min(unit.soulMax, unit.soul + change));
         }
     });
 
@@ -2109,6 +2139,7 @@ function stripTags(text) {
         .replace(/\[ENEMY:\s*[^|]+\|\s*HP:\s*\d+\/\d+\]/gi, '')
         .replace(/\[RAISE:\s*[^\]]+\]/gi, '')
         .replace(/\[BIND:\s*[^\]]+\]/gi, '')
+        .replace(/\[DEMON_SOUL:\s*[^\]]+\]/gi, '')
         .replace(/\[UNIT_HP:\s*[^\]]+\]/gi, '')
         .replace(/\[SFX:\s*[\s\S]*?(?:\}|\])\s*\]/gi, '')
         .trim();
@@ -2156,10 +2187,18 @@ Bound demons are more powerful than risen dead but harder to control. They remem
 2. He must then "Perform the Ritual" while the Emissary is below ~30 HP.
 When Morikage performs the ritual, his preparation is consumed. Adjudicate the success or failure of the binding based on the enemy's HP.
 
-Emit: [BIND: DemonName | KIND: Demon type | MEM: Demonic memory/character | ABILITY: Short description of unique combat ability]
-Example: [BIND: Guren | KIND: Kasha | MEM: It remembers burning castles and resents guarding a dirt road. | ABILITY: Hellfire Burst - can ignite enemies for extra damage.]
+Emit: [BIND: DemonName | KIND: Demon type | MEM: Demonic memory/character | ABILITY: Short description of unique combat ability | SOUL: N]
+- SOUL: N sets the demon's starting soul charges (e.g. SOUL: 4 for a minor demon, SOUL: 6 for a powerful one).
+Example: [BIND: Guren | KIND: Kasha | MEM: It remembers burning castles and resents guarding a dirt road. | ABILITY: Hellfire Burst - can ignite enemies for extra damage. | SOUL: 4]
 Bound demons count toward army capacity but cost double (2 slots).
 A bound demon pushed too hard may break free — narrator's discretion.
+
+## BOUND DEMON SOUL (Ability Charges)
+Each bound demon has a Soul pool (e.g. 4/4). Using their ability costs 1 Soul charge.
+- When a bound demon uses its ability, emit: [DEMON_SOUL: DemonName | -1]
+- If a bound demon's Soul is 0 (shown in context as "ABILITY LOCKED"), they CANNOT use their ability. Do not narrate them using it.
+- Bound demon soul does NOT regenerate per turn. It is restored only when Morikage rests (sleeps at an inn or camps). On a full rest, emit [DEMON_SOUL: Name | +N] for each bound demon to restore their soul to full (soulMax). Do not restore soul mid-combat or between turns.
+- Stronger demons should have more soul (4–6 for lesser demons, 6–8 for emissaries).
 
 ## CONSUMABLES (MORTAR & PESTLE)
 Morikage carries a mortar and pestle to craft items locally. He can consume these items during action:
@@ -2187,11 +2226,12 @@ Do not invent tags. Use ONLY these exact formats:
 10. [ENEMY: Name | HP: Current/Max] — Enemy health tracking during combat.
 11. [UNIT_HP: Name | +/-N] — Damage or heal a specific raised unit. 
 12. [RAISE: Name | WAS: What they were | MEM: Short memory] — Raising a dead human/creature.
-13. [BIND: DemonName | KIND: Demon type | MEM: Short demonic character | ABILITY: Combat ability] — Binding a weakened demon.
+13. [BIND: DemonName | KIND: Demon type | MEM: Short demonic character | ABILITY: Combat ability | SOUL: N] — Binding a weakened demon. Set N to the demon's starting soul charges.
+14. [DEMON_SOUL: DemonName | -1] — Deduct 1 soul charge when a bound demon uses its ability. Never emit this if the demon's soul is already 0. On rest, emit [DEMON_SOUL: DemonName | +N] to restore soul charges (use the demon's soulMax as the value).
 
 Examples
 Morikage rests at an inn:
-[HP: 100] [Soul: 100]
+[HP: 100] [Soul: 100] [DEMON_SOUL: DemonName | +N] (emit one [DEMON_SOUL] per bound demon, restoring each to their soulMax)
 
 Morikage consumes a Remedy:
 [HP: +30]
@@ -2262,7 +2302,7 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 - **HP:** 160 | **Resistances:** Immune to ofuda below 20 Soul cost
 - **Abilities:** *Feather Storm* (rains black iron feathers, 15 damage to Morikage and all front-line units) | *Face-Steal* (disguises itself as a risen unit — Morikage must identify it before it executes a killing blow)
 - **Binding DC:** Medium. Can be bound with a prepared ritual once below 30 HP.
-- **On Bind:** [BIND: Kurohane | KIND: Corrupted Tengu | MEM: It remembers guarding a mountain pass for three centuries and cannot explain why it now wears a dead woman's face. | ABILITY: Feather Storm - rains iron feathers on all enemies]
+- **On Bind:** [BIND: Kurohane | KIND: Corrupted Tengu | MEM: It remembers guarding a mountain pass for three centuries and cannot explain why it now wears a dead woman's face. | ABILITY: Feather Storm - rains iron feathers on all enemies | SOUL: 6]
 
 ### Second Emissary — Mure-no-Hi (Army: 20)
 *"The Swarm-Fire"* — A Kasha-type Immolator that has consumed so many funeral pyres it has become a living cremation. It does not walk — it rolls, a sphere of stolen bones and blue flame.
@@ -2270,7 +2310,7 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 - **HP:** 260 | **Resistances:** Immune to physical damage from risen dead; takes double damage from Kegare Siphon
 - **Abilities:** *Bonepyre Surge* (erupts in a 20-foot radius, 25 damage to all nearby) | *Funeral Hunger* (attempts to consume one risen unit each turn, destroying it permanently)
 - **Binding DC:** Hard. A bound Mure-no-Hi has a 1-in-4 chance each combat of attempting to devour the nearest risen unit.
-- **On Bind:** [BIND: Mure-no-Hi | KIND: Kasha (Bonepyre) | MEM: It remembers the warmth of ten thousand funeral rites and has confused grief for appetite. | ABILITY: Bonepyre Surge - erupts in a damaging 20-foot radius]
+- **On Bind:** [BIND: Mure-no-Hi | KIND: Kasha (Bonepyre) | MEM: It remembers the warmth of ten thousand funeral rites and has confused grief for appetite. | ABILITY: Bonepyre Surge - erupts in a damaging 20-foot radius | SOUL: 6]
 
 ### Third Emissary — Tetsu-Kage (Army: 30)
 *"The Iron Shadow"* — A former Oni warlord Zan-Kuroda personally broke and reforged as a weapon. It wears lamellar armor fused to its flesh and carries a naginata that severs soul-ties — killing Morikage's risen permanently rather than merely destroying their bodies.
@@ -2278,7 +2318,7 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 - **HP:** 400 | **Resistances:** Resistant to Soul-based spells (half damage); immune to Wither
 - **Abilities:** *Soul-Severance* (naginata strike permanently destroys one risen unit, cannot be re-raised) | *Shadow Step* (teleports behind Morikage, bypassing front-line units entirely) | *Iron Roar* (fear effect — 3 risen units flee for one turn)
 - **Binding DC:** Very Hard. May break free if Morikage's Soul falls below 40.
-- **On Bind:** [BIND: Tetsu-Kage | KIND: Reforged Oni Warlord | MEM: It remembers the sound of its own will being hammered flat like hot iron and hates Morikage for making it feel that again. | ABILITY: Soul-Severance - permanently destroys a target enemy unit]
+- **On Bind:** [BIND: Tetsu-Kage | KIND: Reforged Oni Warlord | MEM: It remembers the sound of its own will being hammered flat like hot iron and hates Morikage for making it feel that again. | ABILITY: Soul-Severance - permanently destroys a target enemy unit | SOUL: 8]
 
 ### Fourth Emissary — Shirome-no-Umi (Army: 40)
 *"The White-Eyed Sea"* — A Yurei-swarm given one mind and one hunger. It appears as a tide of pale faces rising from the earth, each face belonging to someone Morikage has raised.
@@ -2286,7 +2326,7 @@ As Morikage's bound army grows, Zan-Kuroda takes notice. He dispatches four Emis
 - **HP:** 560 (distributed across 4 nodes of 140 HP each — destroying a node reduces its power by 25%) | **Resistances:** Immune to physical damage; immune to Necrotic Burst; Yokai Ward is half-effective
 - **Abilities:** *Grief Tide* (engulfs a risen unit, turning it against Morikage for one turn) | *Hollow Accusation* (psychic drain — [HP: -20] [SOUL: -15] if Morikage does not use Death Ward) | *Mirror Dead* (copies the appearance of Morikage's most powerful bound demon — Morikage must identify which is real)
 - **Binding DC:** Extreme. Cannot be bound whole — Morikage must destroy 3 nodes first, then bind the surviving fragment.
-- **On Bind:** [BIND: Shirome | KIND: Yurei Swarm-Fragment | MEM: The fragment that remains remembers being a child afraid of the dark and does not understand what it has become. | ABILITY: Grief Tide - engulfs and turns one enemy unit]
+- **On Bind:** [BIND: Shirome | KIND: Yurei Swarm-Fragment | MEM: The fragment that remains remembers being a child afraid of the dark and does not understand what it has become. | ABILITY: Grief Tide - engulfs and turns one enemy unit | SOUL: 5]
 
 ### Zan-Kuroda, Oni Shogun (Army: 50)
 *"The Gate-Breaker"* — He does not send an emissary. He comes. The Yomi-Gate nearest to Morikage tears open and Zan-Kuroda steps through — ancient, vast, armored in volcanic iron, his four arms each carrying a weapon forged in the deepest pit of Yomi. The air smells of ash and old blood. The risen dead go silent.
@@ -2350,7 +2390,7 @@ function buildContext() {
 
     // Army Context
     const armyStr = gameState.army.length > 0 
-        ? gameState.army.map(u => `${u.name} (HP: ${u.hp}/100) [${u.type === 'Bound' ? u.ability : u.was}]`).join(', ') 
+        ? gameState.army.map(u => u.type === 'Bound' ? `${u.name} (HP: ${u.hp}/100, Soul: ${u.soul}/${u.soulMax}${u.soul === 0 ? ' — ABILITY LOCKED' : ''}) [${u.ability}]` : `${u.name} (HP: ${u.hp}/100) [${u.was}]`).join(', ') 
         : 'None';
     ctx += `Army (${gameState.armySize}/${gameState.armyMax}): ${armyStr}\n`;
     
@@ -2399,26 +2439,44 @@ async function sendAction() {
     gameState.turn++;
     turnCount++;
 
-    conversationLog.push({ role: 'user', content: action });
+    // Bound demon soul does NOT regenerate per turn.
+    // Soul is restored only when Morikage rests (handled via [DEMON_SOUL] tags from AI).
 
     document.getElementById('loading').classList.add('visible');
     document.querySelector('.btn-submit').disabled = true;
 
+    // Build context before pushing the user message so history is accurate
+    conversationLog.push({ role: 'user', content: action });
     const currentContext = buildContext();
 
+    const MAX_RETRIES = 4;
+    let lastErr = null;
+    let responseText = null;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const delays = [2000, 10000, 20000, 40000];
+            if (attempt > 0) await new Promise(r => setTimeout(r, delays[attempt - 1]));
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    system_prompt: SYSTEM_PROMPT,
+                    context: currentContext,
+                    player_action: action
+                })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            responseText = data.text;
+            break;
+        } catch (err) {
+            lastErr = err;
+        }
+    }
+
     try {
-        const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                system_prompt: SYSTEM_PROMPT,
-                context: currentContext,
-                player_action: action
-            })
-        });
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        const responseText = data.text;
+        if (!responseText) throw lastErr;
 
         conversationLog.push({ role: 'assistant', content: responseText });
 
@@ -2451,6 +2509,10 @@ async function sendAction() {
         updateUI();
 
     } catch (err) {
+        // Roll back: remove the user message that was added before the failed call
+        conversationLog.pop();
+        gameState.turn--;
+        turnCount--;
         displayMessage(`The link to the chronicle falters. ${err.message}`, action, null);
     }
 
